@@ -3,7 +3,7 @@
 if [ $# -gt 0 ]; then
 
     if [ "$1" == "start" ]; then
-        docker-compose up -d
+        docker-compose up --build -d
 
     elif [ "$1" == "stop" ]; then
         docker-compose down
@@ -39,7 +39,7 @@ if [ $# -gt 0 ]; then
         shift 1
         docker-compose run --rm \
             node \
-            npm "$@"
+             npm "$@"
 
     elif [ "$1" == "yarn" ]; then
         shift 1
