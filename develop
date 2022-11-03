@@ -36,10 +36,12 @@ if [ $# -gt 0 ]; then
             ./vendor/bin/phpunit "$@"
 
     elif [ "$1" == "npm" ]; then
-        shift 1
-        docker-compose run --rm \
-            node \
-             npm "$@"
+        docker-compose exec app php npm install
+        docker-compose exec app php npm run dev
+        # shift 1
+        # docker-compose run --rm \
+        #     node \
+        #      npm "$@"
 
     elif [ "$1" == "yarn" ]; then
         shift 1
