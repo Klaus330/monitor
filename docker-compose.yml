@@ -49,6 +49,19 @@ services:
     working_dir: /opt
     command: echo hi
 
+  queue:
+    build:
+      context: ./docker/app
+      dockerfile: Dockerfile
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+    working_dir: /var/www/html
+    entrypoint: ['php', '/var/www/html/artisan', 'queue:work']
+    networks:
+      - appnet
+
 networks:
   appnet:
     driver: bridge

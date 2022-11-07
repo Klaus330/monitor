@@ -2,12 +2,28 @@
 
 if [ $# -gt 0 ]; then
 
-    if [ "$1" == "start" ]; then
+    if [ "$1" == "up" ]; then
         docker-compose up --build -d
 
+    elif [ "$1" == "start" ]; then
+        shift 1
+        docker-compose start "$@"
+
     elif [ "$1" == "stop" ]; then
+        shift 1
+        docker-compose stop "$@"
+
+    elif [ "$1" == "stop-container" ]; then
+        shift 1
+        docker stop "$@"
+
+    elif [ "$1" == "down" ]; then
         docker-compose down
 
+    elif [ "$1" == "queue" ]; then
+        shift 1
+        docker-compose run --rm queue "$@"
+        
     elif [ "$1" == "artisan" ] || [ "$1" == "art" ]; then
         shift 1
         docker-compose exec \
@@ -36,8 +52,8 @@ if [ $# -gt 0 ]; then
             ./vendor/bin/phpunit "$@"
 
     elif [ "$1" == "npm" ]; then
-        docker-compose exec app php npm install
-        docker-compose exec app php npm run dev
+        docker-compose exec app  npm install
+        docker-compose exec app  npm run dev
         # shift 1
         # docker-compose run --rm \
         #     node \
