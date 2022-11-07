@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Jobs\CrawlSite;
 use App\Models\Site;
 use App\Repositories\SiteRouteRepository;
+use Carbon\Carbon;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -23,6 +25,8 @@ class CrawlerService
             return;
         }
 
+        
+
         try {
             $url = $site->getUrl() . '/' . $route;
 
@@ -35,7 +39,6 @@ class CrawlerService
             ]);
 
             $routes = $this->fetchAllRelatedLinks($response->body(), $site);
-
             $this->crawlFoundRoutes($site, $routes, $route);
         } catch (ConnectionException $e) {
             $this->registerRouteAsCrawled([
@@ -73,6 +76,20 @@ class CrawlerService
 
     protected function registerRouteAsCrawled(array $data): void
     {
+        if ($this->routeRepository->routeHasReachedSnapshotLimit($data['site_id'], $data['route'])) {
+            
+            $route = $this->routeRepository->findLastModifiedSnapshot($data['site_id'], $data['route']);
+
+            $route->update([
+                'http_code' => $data['http_code'],
+                'found_on' => $data['found_on'],
+            ]);
+
+            $route->touch();
+            
+            return;
+        }
+
         $this->routeRepository->create($data);
     }
 

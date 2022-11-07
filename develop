@@ -17,6 +17,9 @@ if [ $# -gt 0 ]; then
         shift 1
         docker stop "$@"
 
+    elif [ "$1" == "stop-queues" ]; then
+        docker stop $(docker-compose ps -q queue)
+
     elif [ "$1" == "down" ]; then
         docker-compose down
 

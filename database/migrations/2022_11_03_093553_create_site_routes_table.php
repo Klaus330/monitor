@@ -22,7 +22,6 @@ return new class extends Migration
             $table->string('found_on')->nullable();
             $table->timestamps();
 
-            $table->unique(['site_id', 'route']);
             $table->index(['site_id', 'http_code']);
         });
     }
