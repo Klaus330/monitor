@@ -8,7 +8,6 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import SideNav from "@/Components/SideNav.vue";
 
 defineProps({
     title: String,
@@ -304,11 +303,8 @@ const logout = () => {
             </header>
 
             <!-- Page Content -->
-            <main class="flex gap-4 items-start justify-center max-w-7xl mx-auto pb-10">
-                <SideNav />
-                <div class="flex-1">
-                    <slot />
-                </div>
+            <main>
+                <slot />
             </main>
         </div>
     </div>

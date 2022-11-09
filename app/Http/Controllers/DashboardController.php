@@ -17,7 +17,7 @@ class DashboardController extends Controller
     {
         dispatch(new CrawlSite(Site::find(1), new CrawlerService(new SiteRouteRepository())))->onQueue('crawlers');
 
-        $sites = $siteRepository->findSitesForUser(auth()->user()->id);
+        $sites = $siteRepository->findSitesForUser(auth()->user()->id)->paginate(10);
 
         return Inertia::render('Dashboard', [
             'sites' => $sites

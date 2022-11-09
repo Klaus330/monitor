@@ -1,3 +1,9 @@
+<script>
+export default {
+    layout: null
+}
+</script>
+
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/inertia-vue3';
 import AuthenticationCard from '@/Components/AuthenticationCard.vue';

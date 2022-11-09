@@ -6,6 +6,11 @@ defineProps({
     policy: String,
 });
 </script>
+<script>
+export default {
+    layout: null
+}
+</script>
 
 <template>
     <Head title="Privacy Policy" />

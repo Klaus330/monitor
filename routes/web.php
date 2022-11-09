@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SiteController;
+use App\Http\Controllers\SiteRouteController;
 use App\Jobs\CrawlSite;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -36,5 +37,8 @@ Route::middleware([
 
     // Sites
     Route::post('site/{user}/create', [SiteController::class, 'create'])->name('site.create');
+    Route::get('site/{site}/broken-routes', [SiteRouteController::class, 'brokenRoutes'])->name('site.broken.routes');
     Route::get('site/{site}', [SiteController::class, 'show'])->name('site.show');
+    Route::get('site/{site}/route/{route}', [SiteRouteController::class, 'show'])->name('site.route.show');
+    Route::get('/test', [SiteController::class, 'test']);
 });

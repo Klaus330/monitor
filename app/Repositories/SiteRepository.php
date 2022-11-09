@@ -15,6 +15,6 @@ class SiteRepository
     {
         $user = $user->id ?? $user;
 
-        return Site::where('user_id', $user)->get();
+        return Site::where('user_id', $user);
     }
 }

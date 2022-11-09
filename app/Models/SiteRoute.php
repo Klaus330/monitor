@@ -21,20 +21,41 @@ class SiteRoute extends Model
 
     protected $visible = [
         'site_id',
+        'id',
         'route',
         'http_code',
         'found_on',
         'updated_at'
     ];
 
+    protected $appends = [
+        'last_check'
+    ];
 
-    public function getUpdatedAtAttribute($value)
+    public function getLastCheckAttribute()
     {
-        return (new Carbon($value))->diffForHumans();
+        return (new Carbon($this->updated_at))->diffForHumans();
     }
 
     public function getRouteAttribute($value)
     {
         return $value . '/';
+    }
+
+    public function getFoundOnAttribute($value)
+    {
+        return $value . '/';
+    }
+
+    public function toArray()
+    {
+        $array = parent::toArray();
+        foreach ($this->getMutatedAttributes() as $key)
+        {
+            if ( ! array_key_exists($key, $array)) {
+                $array[$key] = $this->{$key};   
+            }
+        }
+        return $array;
     }
 }

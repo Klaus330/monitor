@@ -1,3 +1,9 @@
+<script>
+export default {
+    layout: null
+}
+</script>
+
 <script setup>
 import { nextTick, ref } from 'vue';
 import { Head, useForm } from '@inertiajs/inertia-vue3';

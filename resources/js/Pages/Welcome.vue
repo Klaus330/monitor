@@ -1,3 +1,9 @@
+<script>
+export default {
+    layout: null
+}
+</script>
+
 <script setup>
 import { Head, Link } from '@inertiajs/inertia-vue3';
 
@@ -8,6 +14,8 @@ defineProps({
     phpVersion: String,
 });
 </script>
+
+
 
 <template>
     <Head title="Welcome" />

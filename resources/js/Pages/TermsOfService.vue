@@ -7,6 +7,12 @@ defineProps({
 });
 </script>
 
+<script>
+export default {
+    layout: null
+}
+</script>
+
 <template>
     <Head title="Terms of Service" />
 
