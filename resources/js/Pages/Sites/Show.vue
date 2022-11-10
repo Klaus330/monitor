@@ -5,8 +5,8 @@ import { Link } from "@inertiajs/inertia-vue3";
 </script>
 
 <template>
-    <div class=" sm:px-6 lg:px-8 py-5">
-      <div class="bg-white rounded p-3 mt-5">
+    <div class="w-full sm:px-6 lg:px-8 py-5">
+      <div class="bg-white rounded p-3">
         <div>
           <h1 class="font-bold text-2xl mb-4">Crawled Routes</h1>
           <div>

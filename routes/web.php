@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SiteConfigurationController;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\SiteRouteController;
 use App\Jobs\CrawlSite;
@@ -37,6 +38,11 @@ Route::middleware([
 
     // Sites
     Route::post('site/{user}/create', [SiteController::class, 'create'])->name('site.create');
+    Route::get('site/{site}/configuration', [SiteConfigurationController::class, 'index'])->name('site.configuration');
+    Route::patch('site/{site}/configuration', [SiteConfigurationController::class, 'update'])->name('site.configuration.update');
+
+
+
     Route::get('site/{site}/broken-routes', [SiteRouteController::class, 'brokenRoutes'])->name('site.broken.routes');
     Route::get('site/{site}', [SiteController::class, 'show'])->name('site.show');
     Route::get('site/{site}/route/{route}', [SiteRouteController::class, 'show'])->name('site.route.show');

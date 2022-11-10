@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\SiteRegistered;
+use App\Jobs\CrawlersWatcher;
 use App\Models\Site;
 use App\Models\SiteRoute;
 use App\Models\User;
@@ -10,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Repositories\SiteRepository;
 use App\Repositories\SiteRouteRepository;
 use App\Rules\ValidWebsite;
+use App\Services\CrawlerService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -51,6 +53,12 @@ class SiteController extends Controller
 
     public function test()
     {
-        return Inertia::modal("Components/CustomModal");
+        // $site = Site::find(1);
+        // dd([
+        //     'site' => $site->only('name'),
+        //     'configuration' => $site->configuration->only('crawler_delay', 'id')
+        // ]);
+        (new CrawlersWatcher(new CrawlerService(new SiteRouteRepository())))->handle();
+        // return I1nertia::modal("Components/CustomModal");
     }
 }

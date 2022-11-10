@@ -24,8 +24,8 @@ class CrawlerService
         if ($this->routeAlreadyVisited($site, $route)) {
             return;
         }
-
         
+        sleep($site->getCrawlerDelayInMiliseconds());
 
         try {
             $url = $site->getUrl() . '/' . $route;

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\State;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -45,10 +46,9 @@ class Site extends Model
         'routes'
     ];
 
-    public function getStatus() : State
-    {   
-        if($this->status === self::PENDING_STATE)
-        {
+    public function getStatus(): State
+    {
+        if ($this->status === self::PENDING_STATE) {
             return State::PENDING;
         }
 
@@ -62,8 +62,7 @@ class Site extends Model
 
     public function getHeadersAttribute($value)
     {
-        if($value === null)
-        {
+        if ($value === null) {
             return $value;
         }
 
@@ -75,7 +74,7 @@ class Site extends Model
         return $this->hasMany(Scheduler::class);
     }
 
-    public function hasSchedulers() : State
+    public function hasSchedulers(): State
     {
         return $this->schedulers()->count() > 0 ? State::SUCCESS : State::ERROR;
     }
@@ -87,7 +86,7 @@ class Site extends Model
             $this->url,
             $matches
         );
-        
+
         return count($matches[2]) > 0 ? $matches[2][0] : $this->url;
     }
 
@@ -103,10 +102,10 @@ class Site extends Model
 
     public function isPending()
     {
-      return $this->status === self::PENDING_STATE;
+        return $this->status === self::PENDING_STATE;
     }
 
-    public function getSslCertificateStatus() : State
+    public function getSslCertificateStatus(): State
     {
         if (!$this->hasSslCertificate()) {
             return State::PENDING;
@@ -114,8 +113,7 @@ class Site extends Model
 
         $ssl = $this->sslCertificate;
 
-        if($ssl->validTo->lt(now()))
-        {
+        if ($ssl->validTo->lt(now())) {
             return State::ERROR;
         }
 
@@ -134,7 +132,7 @@ class Site extends Model
 
     public function stats()
     {
-      return $this->hasMany(SiteStats::class, "site_id")->latest();
+        return $this->hasMany(SiteStats::class, "site_id")->latest();
     }
 
     public function getLatestStatsAttribute()
@@ -146,13 +144,13 @@ class Site extends Model
     {
         return strtolower($this->schema) === self::SECURE_HTTP;
     }
-    
+
     public function getHostAttribute()
     {
-      $parsedUrl = parse_url($this->url);
-      return $parsedUrl["host"];
+        $parsedUrl = parse_url($this->url);
+        return $parsedUrl["host"];
     }
-    
+
     public function getSchemaAttribute()
     {
         $parsedUrl = parse_url($this->url);
@@ -170,13 +168,13 @@ class Site extends Model
 
     public function owner()
     {
-      return $this->belongsTo(User::class, "user_id");
-    }  
+        return $this->belongsTo(User::class, "user_id");
+    }
 
     public function isOwner($user)
     {
-      return $this->owner->id === $user->id;
-    }  
+        return $this->owner->id === $user->id;
+    }
 
     public function getUrlAttribute($value)
     {
@@ -190,17 +188,17 @@ class Site extends Model
 
     public function hasCheckString()
     {
-      return !empty($this->check);
+        return !empty($this->check);
     }
 
     public function validateResponse($responseBody)
     {
-      return preg_match("/{$this->check}/", $responseBody);
+        return preg_match("/{$this->check}/", $responseBody);
     }
-    
+
     public function allowedToSendEmail()
     {
-      return $this->emailed_at === null || now()->diffInHours($this->emailed_at) > 1;
+        return $this->emailed_at === null || now()->diffInHours($this->emailed_at) > 1;
     }
 
     public function hasTimeout()
@@ -216,22 +214,20 @@ class Site extends Model
 
     public function getLastMonthMonitoringInfo()
     {
-      
-        $latestStats = $this->stats()->where('http_code','not like', '3__')->get()->groupBy(function($item) {
+
+        $latestStats = $this->stats()->where('http_code', 'not like', '3__')->get()->groupBy(function ($item) {
             return $item->created_at->format('d');
-        })->map(function($collection){
+        })->map(function ($collection) {
             return $collection->first();
         })->flatten()->take(30);
 
         $array = [];
-        foreach($latestStats as $stats)
-        {
+        foreach ($latestStats as $stats) {
             $array[now()->day - $stats->ended_at->day] = $stats;
         }
         $latestStats = $array;
 
-        if(! array_key_exists(0, $latestStats) && array_key_exists(1, $latestStats))
-        {
+        if (!array_key_exists(0, $latestStats) && array_key_exists(1, $latestStats)) {
             $latestStats[0] = $latestStats[1];
         }
 
@@ -241,16 +237,15 @@ class Site extends Model
     public function getLastIncidentsAttribute()
     {
         return $this->stats()
-                    ->where('http_code', 'not like', '2__')
-                    ->where('http_code', 'not like', '3__')
-                    ->take(10)
-                    ->get();
+            ->where('http_code', 'not like', '2__')
+            ->where('http_code', 'not like', '3__')
+            ->take(10)
+            ->get();
     }
 
     public function getLastIncidentAttribute()
     {
-        if($this->last_incidents->isEmpty())
-        {
+        if ($this->last_incidents->isEmpty()) {
             return null;
         }
 
@@ -264,17 +259,17 @@ class Site extends Model
 
     public function getRoutesArrayAttribute()
     {
-        return array_map(function($el) {
+        return array_map(function ($el) {
             return $el['route'];
         }, $this->routes()->select('route')->get()->toArray());
     }
-    
-    
+
+
     public function getBrokenLinksAttribute()
     {
         return $this->routes()
-                    ->where('http_code', 'not like', '2__')
-                    ->where('http_code', 'not like', '3__');
+            ->where('http_code', 'not like', '2__')
+            ->where('http_code', 'not like', '3__');
     }
 
     public function hasBrokenLinks()
@@ -291,30 +286,52 @@ class Site extends Model
     {
         return $_SERVER['DOCUMENT_ROOT'] . '/reports/' . $this->id . '/';
     }
-    
 
-    public function getAveragePerformanceAttribute() : int
+
+    public function getAveragePerformanceAttribute(): int
     {
         $stats = $this->latest_stats->take(30);
 
-        return (int) ($stats->reduce(function($carry, $item){
+        return (int) ($stats->reduce(function ($carry, $item) {
             return $carry + $item->duration;
         }) / count($stats));
     }
 
     public function scopeSslOutdated($query)
     {
-      $query->whereRaw('DATE_ADD((SELECT ssl_certificates.updated_at FROM ssl_certificates WHERE sites.id = ssl_certificates.site_id), INTERVAL 1 DAY) <= CURRENT_DATE');
+        $query->whereRaw('DATE_ADD((SELECT ssl_certificates.updated_at FROM ssl_certificates WHERE sites.id = ssl_certificates.site_id), INTERVAL 1 DAY) <= CURRENT_DATE');
     }
 
     public function getDirLighthouseReportsAttribute()
     {
         return $_SERVER['DOCUMENT_ROOT'] . '/lighthouse/' . $this->id . '/';
-
     }
 
     public function hasLighthouseReport()
     {
         return file_exists($this->dir_lighthouse_reports . 'report.html');
+    }
+
+    public function latestCrawled()
+    {
+        $lastCrawledDate = $this->routes()
+            ->select(\DB::raw('DISTINCT MAX(updated_at) as last_updated'))
+            ->groupBy('route')
+            ->orderBy('last_updated', "DESC")
+            ->limit(1)
+            ->pluck('last_updated');
+        
+        if ($lastCrawledDate->isEmpty()) {
+            return now();
+        }
+
+        return new Carbon(
+            $lastCrawledDate[0]
+        );
+    }
+
+    public function configuration()
+    {
+        return $this->hasOne(SiteConfiguration::class, 'site_id');
     }
 }

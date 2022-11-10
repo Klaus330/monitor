@@ -306,7 +306,7 @@ const logout = () => {
             <!-- Page Content -->
             <main class="flex gap-4 items-start justify-center max-w-7xl mx-auto pb-10">
                 <SideNav />
-                <div class="flex-1">
+                <div class="flex-1  mt-5">
                     <slot />
                 </div>
             </main>

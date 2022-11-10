@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Events\SiteRegistered;
+use App\Listeners\CreateSiteConfiguration;
 use App\Listeners\StartCrawlingSite;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -22,6 +23,7 @@ class EventServiceProvider extends ServiceProvider
         ],
         SiteRegistered::class => [
             StartCrawlingSite::class,
+            CreateSiteConfiguration::class,
         ]
     ];
 
