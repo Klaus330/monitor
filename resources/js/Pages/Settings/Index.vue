@@ -4,6 +4,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import TextInput from "@/Components/TextInput.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
+import ActionsMenu from "@/Components/ActionsMenu.vue";
 
 let form = useForm({
   crawler_delay: usePage().props.value.configuration.crawler_delay,
@@ -18,8 +19,11 @@ let saveChanges = () => {
 
 <template>
   <div class="sm:px-6 lg:px-8 py-5 w-full mt-5 bg-white w-full">
-    <h2 class="text-2xl font-bold mb-3">Settings</h2>
+     <div class="flex items-start justify-between px-2">
+        <h2 class="text-2xl font-bold mb-3">Settings</h2>
 
+        <ActionsMenu />
+      </div>
     <form @submit.prevent="saveChanges">
       <div class="my-4 w-1/4">
         <InputLabel for="crawler_delay" value="Crawler Delay (ms):" />
