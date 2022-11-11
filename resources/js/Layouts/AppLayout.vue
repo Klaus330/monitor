@@ -9,6 +9,7 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import SideNav from "@/Components/SideNav.vue";
+import FlashMessage from '@/Components/FlashMessage.vue';
 
 defineProps({
     title: String,
@@ -305,6 +306,7 @@ const logout = () => {
 
             <!-- Page Content -->
             <main class="flex gap-4 items-start justify-center max-w-7xl mx-auto pb-10">
+                <FlashMessage />
                 <SideNav />
                 <div class="flex-1  mt-5">
                     <slot />
