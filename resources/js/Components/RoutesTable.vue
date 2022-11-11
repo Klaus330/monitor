@@ -1,20 +1,22 @@
 <script setup>
 import { Link } from "@inertiajs/inertia-vue3";
 import { reactive } from "vue";
-import Pagination from "@/Components/Pagination.vue"
-
 
 let props = defineProps({
   site: Object,
   siteRoutes: Object,
+  hasActions: false,
 });
 
 let columns = reactive(["Site", "Status", "Found On", "Last Checked At"]);
 
-let hasRoutesRegistered = () => {
-  return props.siteRoutes.data.length > 0;
-};
+if (props.hasActions) {
+  columns.push("Actions");
+}
 
+let hasRoutesRegistered = () => {
+  return props.siteRoutes.length > 0;
+};
 </script>
 
 <template>
@@ -34,14 +36,11 @@ let hasRoutesRegistered = () => {
     <tbody v-if="hasRoutesRegistered()">
       <tr
         class="bg-white hover:bg-indigo-50 rounded"
-        v-for="siteRoute of siteRoutes.data"
+        v-for="siteRoute of siteRoutes"
         :key="`sites-${siteRoute.siteRoute}`"
       >
         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-400">
-          <Link
-            :href="route('site.route.show', { site: site.id, route: siteRoute.id })"
-            >{{ siteRoute.route }}</Link
-          >
+          <span>{{ siteRoute.route }}</span>
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
           <div class="flex items-center">
@@ -58,6 +57,17 @@ let hasRoutesRegistered = () => {
             {{ siteRoute.last_check ?? "not visited yet" }}
           </div>
         </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" v-if="hasActions">
+          <div class="flex items-center">
+            <button
+              type="button"
+              class="p-2 bg-gray-300 border broder-gray-400 rounded hover:"
+              @click="$emit('fetchroute', { route: siteRoute })"
+            >
+              history
+            </button>
+          </div>
+        </td>
       </tr>
     </tbody>
 
@@ -67,6 +77,4 @@ let hasRoutesRegistered = () => {
       </tr>
     </tbody>
   </table>
-
-  <Pagination :links="siteRoutes.links" class="mt-10"/>
 </template>
