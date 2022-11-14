@@ -39,6 +39,10 @@ class CrawlSite implements ShouldQueue, ShouldBeUnique
      */
     public function handle()
     {
+        if (!$this->site->configuration->has_crawlers) {
+            return;
+        }
+
         $this->crawler->crawl($this->site, $this->startingRoute, $this->foundOnRoute);
     }
 

@@ -6,6 +6,7 @@ use App\Jobs\CrawlSite;
 use App\Models\Site;
 use App\Repositories\SiteRouteRepository;
 use Carbon\Carbon;
+use GuzzleHttp\TransferStats;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
@@ -25,17 +26,26 @@ class CrawlerService
             return;
         }
 
+        $responseTime = 0;
         sleep($site->configuration->getCrawlerDelayInMiliseconds());
 
         try {
             $url = $site->getUrl() . '/' . $route;
 
-            $response = Http::withOptions(["verify" => true])->get($url);
+            $response = Http::get($url, [
+                "verify" => true,
+                'headers' => [
+                    'User-Agent' => "Oopsie.app"
+                ]
+            ]);
+
+            dd($response->transferStats);
             $this->registerRouteAsCrawled([
                 'site_id' => $site->id,
                 'route' => $route,
                 'found_on' => $foundOnRoute,
-                'http_code' => $response->status()
+                'http_code' => $response->status(),
+                'response_time' => round($response->transferStats->getTransferTime() / 1000)
             ]);
 
             $routes = $this->fetchAllRelatedLinks($response->body(), $site);
@@ -44,6 +54,7 @@ class CrawlerService
             $this->registerRouteAsCrawled([
                 'site_id' => $site->id,
                 'route' => $route,
+                'response_time' => 0,
                 'found_on' => $foundOnRoute,
                 'http_code' => self::BAD_REQUEST_CODE
             ]);

@@ -39,12 +39,12 @@ class CrawlersWatcher implements ShouldQueue
         Site::chunk(100, function ($sites) {
             $sites->each(function ($site) {
                 $route = $site->latestCrawled();
+                $site->load('configuration');
 
-                if ($route->diffInMinutes() <= self::CRAWLER_DELAY) {
+                if (!$site->configuration->has_crawlers || $route->diffInMinutes() <= self::CRAWLER_DELAY) {
                     return;
                 }
 
-                $site->load('configuration');
 
                 CrawlSite::dispatch($site, $this->crawler)->onQueue('crawlers');
             });

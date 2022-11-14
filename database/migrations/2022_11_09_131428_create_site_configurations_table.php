@@ -19,6 +19,9 @@ return new class extends Migration
             $table->foreignIdFor(Site::class, 'site_id')->onDelete('cascade');
             $table->unsignedInteger('crawler_delay')->default(100);
             $table->boolean('respect_robots')->default(0);
+            $table->boolean('has_crawlers')->default(1);
+            $table->boolean('has_uptime')->default(1);
+            $table->boolean('has_lighthouse')->default(1);
             $table->timestamps();
         });
     }

@@ -60,8 +60,9 @@ class RegisterRobotsTxtPreferences implements ShouldQueue, ShouldBeUnique
 
         $this->site->save();
 
-        $this->site->configuration->respect_robots = !empty($forbiddenRoutes);
-        $this->site->configuration->save();
+        $this->site->configuration->update([
+            'respect_robots' => !empty($forbiddenRoutes)
+        ]);
     }
 
     public function failed($e)

@@ -16,7 +16,8 @@ class SiteRoute extends Model
         'route',
         'http_code',
         'found_on',
-        'updated_at'
+        'updated_at',
+        'response_time'
     ];
 
     protected $visible = [
@@ -25,7 +26,8 @@ class SiteRoute extends Model
         'route',
         'http_code',
         'found_on',
-        'updated_at'
+        'updated_at',
+        'response_time'
     ];
 
     protected $appends = [

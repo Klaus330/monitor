@@ -14,8 +14,10 @@ use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
-    public function index(SiteRepository $siteRepository)
+    public function index(SiteRepository $siteRepository, SiteRouteRepository $siteRouteRepository)
     {
+
+        // dd($siteRouteRepository->getRoutesSnapshotsCount(2));
         // dispatch(new CrawlSite(Site::find(14s), new CrawlerService(new SiteRouteRepository)))->onQueue('crawlers');
 
         $sites = $siteRepository

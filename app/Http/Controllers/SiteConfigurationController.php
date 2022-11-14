@@ -10,10 +10,17 @@ use Illuminate\Http\Request;
 class SiteConfigurationController extends Controller
 {
     public function index(Site $site)
-    {   
+    {
         return inertia('Settings/Index', [
             'site' => $site,
-            'configuration' => $site->configuration->only('crawler_delay', 'id', 'respect_robots'),
+            'configuration' => $site->configuration->only(
+                'crawler_delay',
+                'id',
+                'respect_robots',
+                'has_uptime',
+                'has_crawlers',
+                'has_lighthouse'
+            ),
         ]);
     }
 
@@ -21,7 +28,10 @@ class SiteConfigurationController extends Controller
     {
         $validated = $request->validate([
             'crawler_delay' => 'required|numeric|min:0',
-            'respect_robots' => 'required|boolean'
+            'respect_robots' => 'required|boolean',
+            'has_crawlers' => 'required|boolean',
+            'has_uptime' => 'required|boolean',
+            'has_lighthouse' => 'required|boolean'
         ]);
 
         try {
@@ -30,11 +40,10 @@ class SiteConfigurationController extends Controller
                 'site_id' => $site->id,
                 ...$validated
             ]);
-    
-            return back()->with('success', 'Settings saved successfully');
-        }catch(QueryException $e)
-        {
-            return back()->with('error', 'An error occured while updating.');
+
+            return redirect(route('site.configuration', ['site' => $site->id]))->with('success', 'Settings saved successfully');
+        } catch (QueryException $e) {
+            return redirect(route('site.configuration', ['site' => $site->id]))->with('error', 'An error occured while updating.');
         }
     }
 }

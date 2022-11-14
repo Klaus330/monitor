@@ -14,17 +14,26 @@ class SiteConfiguration extends Model
         'site_id',
         'crawler_delay',
         'updated_at',
-        'respect_robots'
+        'respect_robots',
+        'has_uptime',
+        'has_crawlers',
+        'has_lighthouse'
     ];
 
     public $visible = [
         'id',
         'crawler_delay',
-        'respect_robots'
+        'respect_robots',
+        'has_uptime',
+        'has_crawlers',
+        'has_lighthouse'
     ];
 
     public $casts = [
         'respect_robots' => "boolean",
+        'has_uptime' => "boolean",
+        'has_crawlers' => "boolean",
+        'has_lighthouse' => "boolean",
     ];
 
     public function site()
