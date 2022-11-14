@@ -17,7 +17,7 @@ class SiteRouteRepository
 
     public function routeForSiteExists(int $siteId, string $route)
     {
-        return SiteRoute::where("site_id", $siteId)
+        return SiteRoute::forSite($siteId)
             ->where('route', $route)
             ->whereRaw("DATE_ADD(updated_at, INTERVAL " . self::INTERVAL_LIMIT . " MINUTE) > CURRENT_TIMESTAMP")
             ->exists();
@@ -27,7 +27,7 @@ class SiteRouteRepository
     public function routeHasReachedSnapshotLimit(int $siteId, string $route)
     {
         return SiteRoute::select("route", \DB::raw("COUNT(*) as route_count"))
-            ->where('site_id', $siteId)
+            ->forSite($siteId)
             ->where('route', $route)
             ->groupBy('route')
             ->having("route_count", self::SNAPSHOT_LIMIT)
@@ -36,7 +36,7 @@ class SiteRouteRepository
 
     public function findLastModifiedSnapshot(int $siteId, string $route)
     {
-        return SiteRoute::where('site_id', $siteId)
+        return SiteRoute::forSite($siteId)
             ->where("route", $route)
             ->orderBy('updated_at')
             ->first();
@@ -53,6 +53,7 @@ class SiteRouteRepository
         $latestRoutes = $this->getLatestUpdatedRoutes($site->id);
 
         return SiteRoute::where('site_id', $site->id)
+            ->orderBy('updated_at', 'DESC')
             ->whereIn('updated_at', $latestRoutes);
     }
 
@@ -60,17 +61,26 @@ class SiteRouteRepository
     {
         $latestRoutes = $this->getLatestUpdatedRoutes($siteId);
 
-        return SiteRoute::where('site_id', $siteId)
+        return SiteRoute::forSite($siteId)
             ->where('http_code', "NOT LIKE", '2__')
             ->where('http_code', "NOT LIKE", '3__')
+            ->orderBy('updated_at', 'DESC')
             ->whereIn('updated_at', $latestRoutes);
     }
 
     public function getLatestUpdatedRoutes(int $siteId)
     {
-        return  SiteRoute::where('site_id', $siteId)
+        return  SiteRoute::forSite($siteId)
             ->select('route', \DB::raw('MAX(updated_at) as updated_at'))
             ->groupBy('route')
+            ->orderBy('route')
             ->pluck('updated_at');
+    }
+
+    public function findRouteHistoryFor(int $siteId, string $route)
+    {
+        return SiteRoute::forSite($siteId)
+            ->where('route', trim($route, '/'))
+            ->get();
     }
 }

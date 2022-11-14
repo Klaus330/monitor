@@ -35,6 +35,8 @@ class Site extends Model
     public $casts = [
         "payload" => "array",
         "headers" => "array",
+        'robots_preference' => 'array',
+        'sitemaps' => 'array'
     ];
 
     public $visible = [
@@ -181,6 +183,11 @@ class Site extends Model
         return trim($value, '/');
     }
 
+    public function getDomainNameAttribute()
+    {
+        return preg_replace('/https?:\/\//', '', $this->url);
+    }
+
     public function acceptsGet()
     {
         return $this->method === self::VERB_GET;
@@ -320,7 +327,7 @@ class Site extends Model
             ->orderBy('last_updated', "DESC")
             ->limit(1)
             ->pluck('last_updated');
-        
+
         if ($lastCrawledDate->isEmpty()) {
             return now();
         }
@@ -333,5 +340,28 @@ class Site extends Model
     public function configuration()
     {
         return $this->hasOne(SiteConfiguration::class, 'site_id');
+    }
+
+
+    public function getSitemapsAttribute(string $value): array
+    {
+        return explode(',', json_decode($value));
+    }
+
+    public function forbiddenRoute(string $route)
+    {
+        if (is_null($this->robots_preference)) {
+            return;
+        }
+
+        // $isValid = true;
+
+        // foreach ($this->robots_preference as $forbiddenRoute) {
+        //     if (str_starts_with($route, $forbiddenRoute)) {
+        //         $isValid = true;
+        //     }
+        // }
+
+        // return $isValid;
     }
 }

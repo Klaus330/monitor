@@ -23,6 +23,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['site_id', 'http_code']);
+            $table->index(['site_id', 'route']);
         });
     }
 

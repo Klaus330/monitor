@@ -17,4 +17,9 @@ class SiteRepository
 
         return Site::where('user_id', $user);
     }
+
+    public function find(int $id)
+    {
+        return Site::find($id);
+    }
 }

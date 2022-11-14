@@ -40,7 +40,7 @@ Route::middleware([
     Route::post('site/{user}/create', [SiteController::class, 'create'])->name('site.create');
     Route::get('site/{site}/configuration', [SiteConfigurationController::class, 'index'])->name('site.configuration');
     Route::patch('site/{site}/configuration', [SiteConfigurationController::class, 'update'])->name('site.configuration.update');
-
+    Route::delete('site/delete', [SiteController::class, 'destroy'])->name('site.delete');
 
 
     Route::get('site/{site}/broken-routes', [SiteRouteController::class, 'brokenRoutes'])->name('site.broken.routes');

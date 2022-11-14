@@ -24,13 +24,13 @@ class CrawlerService
         if ($this->routeAlreadyVisited($site, $route)) {
             return;
         }
-        
-        sleep($site->getCrawlerDelayInMiliseconds());
+
+        sleep($site->configuration->getCrawlerDelayInMiliseconds());
 
         try {
             $url = $site->getUrl() . '/' . $route;
 
-            $response = Http::withOptions(["verify" => false])->get($url);
+            $response = Http::withOptions(["verify" => true])->get($url);
             $this->registerRouteAsCrawled([
                 'site_id' => $site->id,
                 'route' => $route,
@@ -52,9 +52,10 @@ class CrawlerService
         }
     }
 
-    protected function fetchAllRelatedLinks($content, $site)
+    protected function fetchAllRelatedLinks(string $content, Site $site): array
     {
         preg_match_all('/<a.*?href="(.*?)".*?>/', $content, $matches);
+
 
         $routes = array_map(function ($el) use ($site) {
             $trimmedRoute = trim($el, '/');
@@ -63,21 +64,28 @@ class CrawlerService
                 return "";
             }
 
+            $trimmedRoute = trim(preg_replace("/https?:\/\/{$site->domainName}/", '', $trimmedRoute), '/');
             return $trimmedRoute;
         }, $matches[1]);
 
         return array_unique(array_filter($routes));
     }
 
-    protected function isOriginatedFromSite($url, $site)
+    protected function isOriginatedFromSite(string $url, Site $site): bool
     {
-        return strpos($url, $site->url) === 0 || substr($url, 0, 1) === '/' || substr($url, 0, 1) === '?';
+        $isValid = strpos($url, $site->url) === 0 || substr($url, 0, 1) === '/' || substr($url, 0, 1) === '?';
+
+        if (!$site->configuration->respect_robots) {
+            $isValid = $isValid && !$site->forbiddenRoute($url);
+        }
+
+        return $isValid;
     }
 
     protected function registerRouteAsCrawled(array $data): void
     {
         if ($this->routeRepository->routeHasReachedSnapshotLimit($data['site_id'], $data['route'])) {
-            
+
             $route = $this->routeRepository->findLastModifiedSnapshot($data['site_id'], $data['route']);
 
             $route->update([
@@ -86,14 +94,14 @@ class CrawlerService
             ]);
 
             $route->touch();
-            
+
             return;
         }
 
         $this->routeRepository->create($data);
     }
 
-    protected function crawlFoundRoutes($site, $routes, $foundOnRoute)
+    protected function crawlFoundRoutes(Site $site, array $routes, string $foundOnRoute): void
     {
         foreach ($routes as $route) {
             if ($this->routeAlreadyVisited($site, $route)) {
@@ -104,7 +112,7 @@ class CrawlerService
         }
     }
 
-    protected function routeAlreadyVisited($site, $route)
+    protected function routeAlreadyVisited(Site $site, string $route): bool
     {
         return $this->routeRepository->routeForSiteExists($site->id, trim($route, " "));
     }

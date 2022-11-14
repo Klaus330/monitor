@@ -39,8 +39,11 @@ let hasRoutesRegistered = () => {
         v-for="siteRoute of siteRoutes"
         :key="`sites-${siteRoute.siteRoute}`"
       >
-        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-400">
-          <span>{{ siteRoute.route }}</span>
+        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-400 text-ellipsis whitespace-nowrap max-w-xs overflow-hidden">
+          <a
+          :href="site.url + '/' + siteRoute.route"
+          target="_blank"
+          >{{ siteRoute.route }}</a>
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
           <div class="flex items-center">

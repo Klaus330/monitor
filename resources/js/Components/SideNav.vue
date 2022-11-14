@@ -29,7 +29,7 @@ const links = [
 
 <template>
   <div class="px-3 bg-red h-full py-10 max-w-xl min-w-56">
-    <h3 class="mb-3 text-indigo-600 font-bold flex gap-2 items-center justify-start">
+    <a :href="$page.props.site.url" target="_blank" class="mb-3 text-indigo-600 font-bold flex gap-2 items-center justify-start">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="fill-indigo-600 w-4 h-4"
@@ -42,7 +42,7 @@ const links = [
         />
       </svg>
       {{ $page.props.site.name }}
-    </h3>
+    </a>
     <ul>
       <ResponsiveNavLink
         :href="route(`${link.name}`, link.props)"

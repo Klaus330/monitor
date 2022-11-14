@@ -44,6 +44,8 @@ class CrawlersWatcher implements ShouldQueue
                     return;
                 }
 
+                $site->load('configuration');
+
                 CrawlSite::dispatch($site, $this->crawler)->onQueue('crawlers');
             });
         });

@@ -27,7 +27,7 @@ class CreateSiteConfiguration
     public function handle($event)
     {
         $this->configurationRepo->create([
-            'site_id' => $event->site->id
+            'site_id' => $event->site->id,
         ]);
     }
 }

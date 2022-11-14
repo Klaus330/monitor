@@ -13,14 +13,15 @@ class SiteConfigurationController extends Controller
     {   
         return inertia('Settings/Index', [
             'site' => $site,
-            'configuration' => $site->configuration->only('crawler_delay', 'id')
+            'configuration' => $site->configuration->only('crawler_delay', 'id', 'respect_robots'),
         ]);
     }
 
     public function update(Site $site, Request $request, SiteConfigurationRepository $siteConfigurationRepository)
     {
         $validated = $request->validate([
-            'crawler_delay' => 'required|numeric|min:0'
+            'crawler_delay' => 'required|numeric|min:0',
+            'respect_robots' => 'required|boolean'
         ]);
 
         try {
@@ -30,7 +31,7 @@ class SiteConfigurationController extends Controller
                 ...$validated
             ]);
     
-            return back()->with('success', 'Site added');
+            return back()->with('success', 'Settings saved successfully');
         }catch(QueryException $e)
         {
             return back()->with('error', 'An error occured while updating.');

@@ -9,9 +9,10 @@ use Illuminate\Http\Request;
 
 class SiteRouteController extends Controller
 {
-    public function show(Site $site, string $route)
+    public function show(Site $site, SiteRoute $route, SiteRouteRepository $routesRepo)
     {
-        
+        $routes = $routesRepo->findRouteHistoryFor($site->id, $route->route);
+        return $routes;
     }
 
     public function brokenRoutes(Site $site, SiteRouteRepository $siteRouteRepository)

@@ -13,12 +13,18 @@ class SiteConfiguration extends Model
         'id',
         'site_id',
         'crawler_delay',
-        'updated_at'
+        'updated_at',
+        'respect_robots'
     ];
 
     public $visible = [
         'id',
-        'crawler_delay'
+        'crawler_delay',
+        'respect_robots'
+    ];
+
+    public $casts = [
+        'respect_robots' => "boolean",
     ];
 
     public function site()

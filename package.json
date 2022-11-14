@@ -28,5 +28,9 @@
         "unplugin-vue-macros": "^0.16.1",
         "vite": "3.0.4",
         "vue": "^3.2.31"
+    },
+    "dependencies": {
+        "@headlessui/react": "^1.7.4",
+        "@headlessui/vue": "^1.7.4"
     }
 }

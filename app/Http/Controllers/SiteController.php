@@ -18,22 +18,37 @@ use Inertia\Inertia;
 
 class SiteController extends Controller
 {
+
+    public function __construct(protected SiteRepository $siteRepository)
+    {
+        
+    }
+
     public function create(User $user, Request $request, SiteRepository $repo): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'site'  => ['required', new ValidWebsite]
         ]);
+
+        $domainName = preg_replace('/https?:\/\//', '', $validated['site']);
+
+        $url = 'https://' . $domainName;
 
         try {
             $site = $repo->create([
                 'user_id' => $user->id,
-                'url' => $request->get('site')
+                'url' => $url
             ]);
 
             SiteRegistered::dispatch($site);
 
-            return back()->with('success', 'Site added');
+            session()->flash('success', 'Site added successfully.');
+
+            return back();
         } catch (QueryException $e) {
+            dd($e);
+            session()->flash('error', 'An error occured.');
+            
             return back()->withErrors(['site' => 'Site already registered']);
         }
     }
@@ -43,7 +58,8 @@ class SiteController extends Controller
     {
         $routes = $siteRouteRepository
                         ->latestSiteRouteStatuses($site)
-                        ->paginate();
+                        ->paginate(30);
+
 
         return inertia("Sites/Show", [
             'site' => $site,
@@ -60,5 +76,20 @@ class SiteController extends Controller
         // ]);
         (new CrawlersWatcher(new CrawlerService(new SiteRouteRepository())))->handle();
         // return I1nertia::modal("Components/CustomModal");
+    }
+
+    public function destroy(Request $request)
+    {
+        // Add authorization
+
+        $validated = $request->validate(['site_id' => "required|integer"]);
+
+        $site = $this->siteRepository->find($validated['site_id']);
+
+        $site->delete();
+
+        session()->flash('success', 'Site deleted successfully.');
+
+        return redirect(route('dashboard'));
     }
 }

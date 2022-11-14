@@ -28,6 +28,8 @@ return new class extends Migration
             $table->string("name")->nullable();
             $table->integer('timeout')->default(0);
             $table->integer('downtime')->default(1);
+            $table->text('sitemaps')->nullable();
+            $table->text('robots_preference')->nullable();
             $table->unique(['url', 'name']);
             $table->unique(['url', 'user_id']);
             $table->timestamps();

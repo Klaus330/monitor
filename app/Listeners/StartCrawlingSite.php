@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Events\SiteRegistered;
 use App\Jobs\CrawlSite;
+use App\Jobs\RegisterRobotsTxtPreferences;
 use App\Services\CrawlerService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -28,6 +29,7 @@ class StartCrawlingSite
      */
     public function handle(SiteRegistered $event)
     {
+        dispatch(new RegisterRobotsTxtPreferences($event->site))->onQueue('robots');
         dispatch(new CrawlSite($event->site, $this->crawler))->onQueue('crawlers');
     }
 }

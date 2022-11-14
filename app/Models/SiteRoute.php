@@ -58,4 +58,9 @@ class SiteRoute extends Model
         }
         return $array;
     }
+
+    public function scopeForSite($query, int $siteId)
+    {
+        return $query->where('site_id', $siteId);
+    }
 }

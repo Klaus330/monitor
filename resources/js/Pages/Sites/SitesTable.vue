@@ -73,7 +73,7 @@ let hasSitesRegistered = () => {
           </div>
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex items-center">
-          {{ site.brokenLinks ?? "null" }}
+          {{ site.has.brokenRoutes ?? "null" }}
           <!-- <a
             href="{{ route('sites.broken-links', ['site' => $site->id]) }}"
             data-tippy-content="See broken links page"
