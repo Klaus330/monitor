@@ -18,7 +18,18 @@ class SiteRouteController extends Controller
     public function brokenRoutes(Site $site, SiteRouteRepository $siteRouteRepository)
     {
         $brokenRoutes = $siteRouteRepository->findBrokenRoutesForSite($site->id)->paginate(30);
+        $siteRoutes = $siteRouteRepository
+            ->latestSiteRouteStatuses($site)
+            ->paginate(15);
 
-        return inertia("SiteRoutes/Broken", compact("brokenRoutes", 'site'));
+
+        return inertia("SiteRoutes/Broken", compact("brokenRoutes", 'site', 'siteRoutes'));
+    }
+
+    public function getAllRoutes(Site $site, SiteRouteRepository $siteRouteRepository)
+    {
+        return  $siteRouteRepository
+            ->latestSiteRouteStatuses($site)
+            ->get();
     }
 }

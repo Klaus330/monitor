@@ -54,16 +54,10 @@ class SiteController extends Controller
     }
 
 
-    public function show(Site $site, SiteRouteRepository $siteRouteRepository)
+    public function show(Site $site)
     {
-        $routes = $siteRouteRepository
-                        ->latestSiteRouteStatuses($site)
-                        ->paginate(30);
-
-
         return inertia("Sites/Show", [
             'site' => $site,
-            'siteRoutes' => $routes,
         ]);
     }
 

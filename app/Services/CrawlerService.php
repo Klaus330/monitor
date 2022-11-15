@@ -39,13 +39,12 @@ class CrawlerService
                 ]
             ]);
 
-            dd($response->transferStats);
             $this->registerRouteAsCrawled([
                 'site_id' => $site->id,
                 'route' => $route,
                 'found_on' => $foundOnRoute,
                 'http_code' => $response->status(),
-                'response_time' => round($response->transferStats->getTransferTime() / 1000)
+                'response_time' => round($response->transferStats->getTransferTime() * 1000)
             ]);
 
             $routes = $this->fetchAllRelatedLinks($response->body(), $site);

@@ -36,8 +36,9 @@ Route::middleware([
 ])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Sites
+    // Sites 
     Route::post('site/{user}/create', [SiteController::class, 'create'])->name('site.create');
+    Route::get('site/{site}/all-routes', [SiteRouteController::class, 'getAllRoutes'])->name('site.routes.all');
     Route::get('site/{site}/configuration', [SiteConfigurationController::class, 'index'])->name('site.configuration');
     Route::patch('site/{site}/configuration', [SiteConfigurationController::class, 'update'])->name('site.configuration.update');
     Route::delete('site/delete', [SiteController::class, 'destroy'])->name('site.delete');

@@ -23,16 +23,16 @@ let actionLinks = [
     <div class="bg-white rounded p-3">
       <div>
         <div class="flex items-start justify-between px-2">
-          <h1 class="font-bold text-2xl mb-4">Crawled Routes</h1>
+          <h1 class="font-bold text-2xl mb-4">Overview</h1>
 
           <ActionsMenu :links="actionLinks" />
         </div>
         <div>
-          <RoutesTable
+          <!-- <RoutesTable
             :siteRoutes="$page.props.siteRoutes.data"
             :site="$page.props.site"
-          />
-          <Pagination :links="$page.props.siteRoutes.links" class="mt-10" />
+          /> -->
+          <!-- <Pagination :links="$page.props.siteRoutes.links" class="mt-10" /> -->
         </div>
       </div>
     </div>
