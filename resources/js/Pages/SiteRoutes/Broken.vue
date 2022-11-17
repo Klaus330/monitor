@@ -10,7 +10,7 @@ import ActionsMenu from "@/Components/ActionsMenu.vue";
 
 let routeModal = ref(false);
 let routeHistory = ref([]);
-let loadedMoreRoutes = ref(false);
+let loadedMoreRoutes = ref(usePage().props.value.siteRoutes.data.length > 15);
 
 let fetchRouteHistory = (e) => {
   console.log(e);
