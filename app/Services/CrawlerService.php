@@ -6,53 +6,83 @@ use App\Jobs\CrawlSite;
 use App\Models\Site;
 use App\Repositories\SiteRouteRepository;
 use Carbon\Carbon;
+use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\TransferStats;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Psr\Http\Message\UriInterface;
 
 class CrawlerService
 {
     protected const BAD_REQUEST_CODE = 400;
 
+    protected string $userAgent = "Oopsie.app";
+
+    protected bool $verifySslCertificate = true;
+
+    protected UriInterface $siteUri;
+
     public function __construct(protected SiteRouteRepository $routeRepository)
     {
     }
 
-    public function crawl(Site $site, string $route, string $foundOnRoute): void
+    public function getUserAgent(): string
+    {
+        return $this->userAgent;
+    }
+
+    public function userAgent(string $userAgent): self
+    {
+        $this->userAgent = $userAgent;
+
+        return $this;
+    }
+
+    public function getVerifySslCertificate(): string
+    {
+        return $this->verifySslCertificate;
+    }
+
+    public function verifySslCertificate(bool $verify = true): self
+    {
+        $this->verifySslCertificate = $verify;
+
+        return $this;
+    }
+
+    public function crawl(Site $site, string $route, string $foundOnRoute)
     {
         if ($this->routeAlreadyVisited($site, $route)) {
             return;
         }
 
-        $responseTime = 0;
-        sleep($site->configuration->getCrawlerDelayInMiliseconds());
+        $this->siteUri = new Uri($site->url);
+        $url = $this->siteUri->withPath($route);
 
         try {
-            $url = $site->getUrl() . '/' . $route;
+            sleep($site->configuration->getCrawlerDelayInMiliseconds());
 
-            $response = Http::get($url, [
-                "verify" => true,
-                'headers' => [
-                    'User-Agent' => "Oopsie.app"
-                ]
-            ]);
+            $response = Http::get($url, $this->getCrawlerConfig());
 
             $this->registerRouteAsCrawled([
                 'site_id' => $site->id,
-                'route' => $route,
+                'route' => $url->getPath(),
                 'found_on' => $foundOnRoute,
                 'http_code' => $response->status(),
                 'response_time' => round($response->transferStats->getTransferTime() * 1000)
             ]);
 
             $routes = $this->fetchAllRelatedLinks($response->body(), $site);
-            $this->crawlFoundRoutes($site, $routes, $route);
+
+            $this->dispatchFoundRoutes($site, $routes, $route);
+            
         } catch (ConnectionException $e) {
             $this->registerRouteAsCrawled([
                 'site_id' => $site->id,
-                'route' => $route,
+                'route' => $url->getPath(),
                 'response_time' => 0,
                 'found_on' => $foundOnRoute,
                 'http_code' => self::BAD_REQUEST_CODE
@@ -62,34 +92,67 @@ class CrawlerService
         }
     }
 
-    protected function fetchAllRelatedLinks(string $content, Site $site): array
+    private function getCrawlerConfig()
+    {
+        return [
+            "verify" => $this->verifySslCertificate,
+            'headers' => [
+                'User-Agent' => $this->userAgent
+            ]
+        ];
+    }
+
+    protected function fetchAllRelatedLinks(string $content, Site $site): Collection
     {
         preg_match_all('/<a.*?href="(.*?)".*?>/', $content, $matches);
 
+        $routesUri = collect($matches[1])->map(function ($item) {
+            return new Uri($item);
+        })->filter(function ($uri) {
+            return $this->isValidUri($uri) && $this->respectsRobots($uri);
+        })->uniqueStrict(function ($item) {
+            return $item->getPath();
+        });
 
-        $routes = array_map(function ($el) use ($site) {
-            $trimmedRoute = trim($el, '/');
-
-            if (!$this->isOriginatedFromSite($el, $site) || $this->routeAlreadyVisited($site, $trimmedRoute)) {
-                return "";
-            }
-
-            $trimmedRoute = trim(preg_replace("/https?:\/\/{$site->domainName}/", '', $trimmedRoute), '/');
-            return $trimmedRoute;
-        }, $matches[1]);
-
-        return array_unique(array_filter($routes));
+        return $routesUri;
     }
 
-    protected function isOriginatedFromSite(string $url, Site $site): bool
+    public function isValidUri($uri)
     {
-        $isValid = strpos($url, $site->url) === 0 || substr($url, 0, 1) === '/' || substr($url, 0, 1) === '?';
-
-        if (!$site->configuration->respect_robots) {
-            $isValid = $isValid && !$site->forbiddenRoute($url);
+        if ($uri->getFragment() !== '' || $uri->getQuery() !== '') {
+            return false;
         }
 
-        return $isValid;
+        if (Uri::isSameDocumentReference($uri, $this->siteUri)) {
+            return true;
+        }
+
+        if (Uri::isAbsolutePathReference($uri) && $uri->getHost() === '') {
+            return true;
+        }
+
+        if (Uri::isRelativePathReference($uri) && $uri->getHost() === '') {
+            return true;
+        }
+
+        if ($uri->getHost() !== $this->siteUri->getHost()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function respectsRobots(): bool
+    {
+        // if (!$site->configuration->respect_robots) {
+        //     $isValid = $isValid && !$site->forbiddenRoute($url);
+        // }
+
+        // return $true;
+
+        //  TODO: IMPLEMENTS REPECTS ROBOTS
+
+        return true;
     }
 
     protected function registerRouteAsCrawled(array $data): void
@@ -111,15 +174,13 @@ class CrawlerService
         $this->routeRepository->create($data);
     }
 
-    protected function crawlFoundRoutes(Site $site, array $routes, string $foundOnRoute): void
+    protected function dispatchFoundRoutes(Site $site, Collection $routes, string $foundOnRoute): void
     {
-        foreach ($routes as $route) {
-            if ($this->routeAlreadyVisited($site, $route)) {
-                continue;
+        $routes->each(function (UriInterface $route) use ($site, $foundOnRoute) {
+            if (!$this->routeAlreadyVisited($site, $route)) {
+                dispatch(new CrawlSite($site, $this, $route, $foundOnRoute))->onQueue('crawlers');
             }
-
-            dispatch(new CrawlSite($site, $this, $route, $foundOnRoute))->onQueue('crawlers');
-        }
+        });
     }
 
     protected function routeAlreadyVisited(Site $site, string $route): bool
