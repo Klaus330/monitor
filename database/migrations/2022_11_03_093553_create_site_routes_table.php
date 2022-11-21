@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('route', 500);
             $table->string('http_code');
             $table->string('found_on')->nullable();
-            $table->unsignedInteger('response_time');
             $table->timestamps();
 
             $table->index(['site_id', 'http_code']);

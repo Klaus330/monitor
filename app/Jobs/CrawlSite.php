@@ -27,8 +27,6 @@ class CrawlSite implements ShouldQueue, ShouldBeUnique
     public function __construct(
         protected Site $site,
         protected CrawlerService $crawler,
-        protected string $startingRoute = '',
-        protected string $foundOnRoute = ''
     ) {
     }
 
@@ -43,7 +41,7 @@ class CrawlSite implements ShouldQueue, ShouldBeUnique
             return;
         }
 
-        $this->crawler->crawl($this->site, $this->startingRoute, $this->foundOnRoute);
+        $this->crawler->crawl($this->site);
     }
 
     public function failed($e)
@@ -54,6 +52,6 @@ class CrawlSite implements ShouldQueue, ShouldBeUnique
 
     public function uniqueId()
     {
-        return $this->site->id . $this->startingRoute;
+        return $this->site->id;
     }
 }

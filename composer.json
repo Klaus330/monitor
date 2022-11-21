@@ -13,6 +13,8 @@
         "laravel/jetstream": "^2.12",
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
+        "spatie/browsershot": "^3.57",
+        "spatie/crawler": "^7.1",
         "tightenco/ziggy": "^1.0"
     },
     "require-dev": {

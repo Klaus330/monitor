@@ -4,8 +4,10 @@ namespace App\Models;
 
 use App\Enums\State;
 use Carbon\Carbon;
+use GuzzleHttp\Psr7\Uri;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Psr\Http\Message\UriInterface;
 
 class Site extends Model
 {
@@ -363,5 +365,10 @@ class Site extends Model
         // }
 
         // return $isValid;
+    }
+
+    public function getUriAttribute(): UriInterface
+    {
+        return new Uri($this->url);
     }
 }
