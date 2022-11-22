@@ -79,7 +79,9 @@ let loadMoreRoutes = async () => {
 
       <div>
         <div class="mt-10">
-          <h2 class="font-bold text-2xl">Crawled Routes</h2>
+          <h2 class="font-bold text-2xl">
+            {{ $page.props.siteRoutesCount }} Crawled Routes
+          </h2>
           <h3 class="font-normal text-sm mt-1 mb-3">
             This table will contain all urls that we crawled at X.
           </h3>

@@ -37,14 +37,14 @@ class SiteRouteRepository
     public function getRoutesSnapshotsCount(int $siteId)
     {
         return SiteRoute::select("route", \DB::raw("COUNT(route) as route_count"))
-                        ->forSite($siteId)
-                        ->groupBy('route')
-                        ->get()
-                        ->mapWithKeys(function ($route) {
-                            return [
-                                $route->route => $route->route_count
-                            ];
-                        });
+            ->forSite($siteId)
+            ->groupBy('route')
+            ->get()
+            ->mapWithKeys(function ($route) {
+                return [
+                    $route->route => $route->route_count
+                ];
+            });
     }
 
     public function findLastModifiedSnapshot(int $siteId, string $route)
@@ -95,5 +95,10 @@ class SiteRouteRepository
         return SiteRoute::forSite($siteId)
             ->where('route', trim($route, '/'))
             ->get();
+    }
+
+    public function getRoutesCountFor(int $siteId): int
+    {
+        return SiteRoute::forSite($siteId)->count();
     }
 }

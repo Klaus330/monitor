@@ -86,8 +86,10 @@ class CustomCrawlerObserver extends CrawlObserver
         ?UriInterface $foundOnUrl = null
     ): void {
         Log::error('crawlFailed', ['url' => $url, 'error' => $requestException->getMessage()]);
-
+        
         $this->registerRoute($url, $requestException->getResponse(), $foundOnUrl);
+
+        dd($requestException);
     }
 
     /**

@@ -16,8 +16,8 @@ class CrawlSite implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $timeout = 15;
-    public $tries = 1;
+    public $timeout = 1200;
+    // public $tries = 1;
 
     /**
      * Create a new job instance.
@@ -53,5 +53,15 @@ class CrawlSite implements ShouldQueue, ShouldBeUnique
     public function uniqueId()
     {
         return $this->site->id;
+    }
+
+    /**
+     * Determine the time at which the job should timeout.
+     *
+     * @return \DateTime
+     */
+    public function retryUntil()
+    {
+        return now()->addMinutes(20);
     }
 }
