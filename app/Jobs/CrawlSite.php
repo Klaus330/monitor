@@ -39,7 +39,7 @@ class CrawlSite implements ShouldQueue, ShouldBeUnique
      */
     public function handle()
     {
-        if (!$this->siteConfigRepo->siteHasSettingActive($this->site, 'broken_routes')) {
+        if (!$this->siteConfigRepo->siteHasSettingActive($this->site, config('site_settings.broken_routes'))) {
             return;
         }
 

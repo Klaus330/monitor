@@ -64,22 +64,22 @@ class CrawlerService
             )
             ->setMaximumResponseSize(self::DEFAULT_MAX_RESPONSE_SIZE)
             ->setParseableMimeTypes(
-                explode(',', $this->siteConfigRepo->getSettingValueForSiteByName($site, 'mime_types')  ?? self::DEFAULT_PARSEABLE_TYPES)
+                explode(',', $this->siteConfigRepo->getSettingValueForSiteByName($site, config('site_settings.mime_types'))  ?? self::DEFAULT_PARSEABLE_TYPES)
             )
             ->setDelayBetweenRequests(
-                $this->siteConfigRepo->getSettingValueForSiteByName($site, 'crawler_delay') ?? self::DEFAULT_DELAY_BETWEEN_REQUESTS
+                $this->siteConfigRepo->getSettingValueForSiteByName($site, config('site_settings.crawler_delay')) ?? self::DEFAULT_DELAY_BETWEEN_REQUESTS
             );
 
-        if ($this->siteConfigRepo->siteHasSettingActive($site, 'nofollow_links')) {
+        if ($this->siteConfigRepo->siteHasSettingActive($site, config('site_settings.nofollow_links'))) {
             $crawler->acceptNofollowLinks();
         }
 
-        if ($this->siteConfigRepo->siteHasSettingActive($site, 'execute_js')) {
+        if ($this->siteConfigRepo->siteHasSettingActive($site, config('site_settings.execute_js'))) {
             $crawler->executeJavascript()
                 ->setBrowsershot($this->browsershot->noSandbox());
         }
 
-        if ($this->siteConfigRepo->siteHasSettingActive($site, 'respect_robots')) {
+        if ($this->siteConfigRepo->siteHasSettingActive($site, config('site_settings.respect_robots'))) {
             $crawler->respectRobots();
         } else {
             $crawler->ignoreRobots();
