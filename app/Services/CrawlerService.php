@@ -6,6 +6,7 @@ use App\CrawlProfiles\CustomCrawlProfile;
 use App\Jobs\CrawlSite;
 use App\Models\Site;
 use App\Observers\CustomCrawlerObserver;
+use App\Repositories\SiteConfigurationRepository;
 use App\Repositories\SiteRouteRepository;
 use Carbon\Carbon;
 use GuzzleHttp\Psr7\Uri;
@@ -23,7 +24,7 @@ use Spatie\Crawler\CrawlProfiles\CrawlInternalUrls;
 
 class CrawlerService
 {
-    protected const DEFAULT_TOTAL_CRAWL_LIMIT = 5000;
+    protected const TOTAL_CRAWL_LIMIT = 5000;
 
     protected const DEFAULT_TIMEOUT_LIMIT = 30;
 
@@ -37,7 +38,7 @@ class CrawlerService
 
     protected const DEFAULT_MAX_RESPONSE_SIZE = 1024 * 1024;
 
-    protected const DEFAULT_PARSEABLE_TYPES = ['text/html', 'text/plain'];
+    protected const DEFAULT_PARSEABLE_TYPES = 'text/html,text/plain';
 
     protected const DEFAULT_USER_AGENT = "Oopsie.app";
 
@@ -45,7 +46,7 @@ class CrawlerService
 
     protected Site $site;
 
-    public function __construct(protected SiteRouteRepository $routeRepository, protected Browsershot $browsershot)
+    public function __construct(protected SiteRouteRepository $routeRepository, protected Browsershot $browsershot, protected SiteConfigurationRepository $siteConfigRepo)
     {
     }
 
@@ -55,17 +56,34 @@ class CrawlerService
 
         $crawler = Crawler::create($this->getCrawlerConfig())
             ->setDefaultScheme(self::DEFAULT_SCHEMA)
-            ->executeJavascript()
-            ->setBrowsershot($this->browsershot->noSandbox())
-            ->acceptNoFollowLinks()
-            ->ignoreRobots()
             ->setCrawlObserver(new CustomCrawlerObserver($site, $this->routeRepository))
             ->setCrawlProfile(new CustomCrawlProfile($site))
-            ->setTotalCrawlLimit(self::DEFAULT_TOTAL_CRAWL_LIMIT)
-            ->setConcurrency(self::DEFAULT_CONCURENCY)
+            ->setTotalCrawlLimit(self::TOTAL_CRAWL_LIMIT)
+            ->setConcurrency(
+                self::DEFAULT_CONCURENCY
+            )
             ->setMaximumResponseSize(self::DEFAULT_MAX_RESPONSE_SIZE)
-            ->setParseableMimeTypes(self::DEFAULT_PARSEABLE_TYPES)
-            ->setDelayBetweenRequests($site->configuration->getCrawlerDelayInMiliseconds() ?? self::DEFAULT_DELAY_BETWEEN_REQUESTS);
+            ->setParseableMimeTypes(
+                explode(',', $this->siteConfigRepo->getSettingValueForSiteByName($site, 'mime_types')  ?? self::DEFAULT_PARSEABLE_TYPES)
+            )
+            ->setDelayBetweenRequests(
+                $this->siteConfigRepo->getSettingValueForSiteByName($site, 'crawler_delay') ?? self::DEFAULT_DELAY_BETWEEN_REQUESTS
+            );
+
+        if ($this->siteConfigRepo->siteHasSettingActive($site, 'nofollow_links')) {
+            $crawler->acceptNofollowLinks();
+        }
+
+        if ($this->siteConfigRepo->siteHasSettingActive($site, 'execute_js')) {
+            $crawler->executeJavascript()
+                ->setBrowsershot($this->browsershot->noSandbox());
+        }
+
+        if ($this->siteConfigRepo->siteHasSettingActive($site, 'respect_robots')) {
+            $crawler->respectRobots();
+        } else {
+            $crawler->ignoreRobots();
+        }
 
         $crawler->startCrawling($site->uri);
     }

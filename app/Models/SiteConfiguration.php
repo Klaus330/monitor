@@ -39,4 +39,9 @@ class SiteConfiguration extends Model
     {
         return $this->crawler_delay / 1000;
     }
+
+    public function scopeForSite($query, int $siteId)
+    {
+        return $query->where('site_id', $siteId);
+    }
 }

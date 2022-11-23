@@ -40,7 +40,6 @@ class CustomCrawlerObserver extends CrawlObserver
         ResponseInterface $response,
         ?UriInterface $foundOnUrl = null
     ): void {
-        // dd($response);
         $this->registerRoute($url, $response, $foundOnUrl);
     }
 
@@ -69,7 +68,6 @@ class CustomCrawlerObserver extends CrawlObserver
             'route' => $urlPath,
             'found_on' => $foundOnUrlPath,
             'http_code' => $response?->getStatusCode() ?? self::BAD_REQUEST_CODE,
-            'response_time' => 0,
         ]);
     }
 

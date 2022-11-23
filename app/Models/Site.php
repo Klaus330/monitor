@@ -161,13 +161,20 @@ class Site extends Model
         return $parsedUrl["scheme"];
     }
 
-    public function getNameAttribute($value)
+    public function getNameAttribute()
     {
-        if (empty($value)) {
+        $friendlyName = \DB::table('site_configurations')
+                    ->join('settings', "site_configurations.setting_id", '=', 'settings.id')
+                    ->where('settings.name', 'friendly_name')
+                    ->where('site_configurations.site_id', $this->id)
+                    ->first()
+                    ->value;
+        
+        if (empty($friendlyName)) {
             return $this->url;
         }
 
-        return $value;
+        return $friendlyName;
     }
 
     public function owner()
@@ -223,7 +230,6 @@ class Site extends Model
 
     public function getLastMonthMonitoringInfo()
     {
-
         $latestStats = $this->stats()->where('http_code', 'not like', '3__')->get()->groupBy(function ($item) {
             return $item->created_at->format('d');
         })->map(function ($collection) {
@@ -348,23 +354,6 @@ class Site extends Model
     public function getSitemapsAttribute(string $value): array
     {
         return explode(',', json_decode($value));
-    }
-
-    public function forbiddenRoute(string $route)
-    {
-        if (is_null($this->robots_preference)) {
-            return;
-        }
-
-        // $isValid = true;
-
-        // foreach ($this->robots_preference as $forbiddenRoute) {
-        //     if (str_starts_with($route, $forbiddenRoute)) {
-        //         $isValid = true;
-        //     }
-        // }
-
-        // return $isValid;
     }
 
     public function getUriAttribute(): UriInterface

@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Site;
+use App\Repositories\SiteConfigurationRepository;
 use App\Services\CrawlerService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -17,7 +18,7 @@ class CrawlSite implements ShouldQueue, ShouldBeUnique
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 1200;
-    // public $tries = 1;
+    public $maxExceptions = 3;
 
     /**
      * Create a new job instance.
@@ -27,6 +28,7 @@ class CrawlSite implements ShouldQueue, ShouldBeUnique
     public function __construct(
         protected Site $site,
         protected CrawlerService $crawler,
+        protected SiteConfigurationRepository $siteConfigRepo
     ) {
     }
 
@@ -37,7 +39,7 @@ class CrawlSite implements ShouldQueue, ShouldBeUnique
      */
     public function handle()
     {
-        if (!$this->site->configuration->has_crawlers) {
+        if (!$this->siteConfigRepo->siteHasSettingActive($this->site, 'broken_routes')) {
             return;
         }
 
@@ -52,7 +54,7 @@ class CrawlSite implements ShouldQueue, ShouldBeUnique
 
     public function uniqueId()
     {
-        return $this->site->id;
+        return $this->site->id . $this->site->url;
     }
 
     /**
