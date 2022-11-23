@@ -23,7 +23,7 @@ Object.values(usePage().props.value.formValues).forEach((item, index, array) => 
 let form = useForm(formValues);
 
 let saveChanges = () => {
-  form.patch(route("site.configuration.update", usePage().props.value.user.id), {
+  form.patch(route("site.configuration.update", usePage().props.value.site.id), {
     preserveScroll: true,
   });
 };
