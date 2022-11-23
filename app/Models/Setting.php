@@ -15,6 +15,7 @@ class Setting extends Model
         'name',
         'default_value',
         'display_name',
+        'description',
         'value_type',
         'updated_at',
     ];
@@ -25,6 +26,7 @@ class Setting extends Model
         'name',
         'default_value',
         'display_name',
+        'descri',
         'value_type',
         'updated_at',
     ];

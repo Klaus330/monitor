@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('display_name');
             $table->string('value_type');
             $table->text('default_value')->nullable();
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }

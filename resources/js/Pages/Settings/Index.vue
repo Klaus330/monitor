@@ -74,13 +74,14 @@ let saveChanges = () => {
                 </div>
 
                 <div class="my-4" v-for="(setting, id) in config" :key="id">
-                  <div v-if="setting.value_type === 'checkbox'">
+                  <div v-if="setting.value_type === 'checkbox'" class="flex flex-col">
                     <Toggle
                       :id="setting.name"
                       :value="`${form[`${setting.name}`]}`"
                       :label="setting.display_name"
                       v-model:checked="form[`${setting.name}`]"
                     />
+                    <span class="pt-2 text-gray-500 text-sm">{{setting.description}}</span>
                     <InputError class="mt-2" :message="form.errors[`${setting.name}`]" />
                   </div>
                   <div v-else>
@@ -94,6 +95,7 @@ let saveChanges = () => {
                       class="mt-1 block w-full"
                       autofocus
                     />
+                    <span class="pt-3 text-gray-500 text-sm">{{setting.description}}</span>
                     <InputError class="mt-2" :message="form.errors[`${setting.name}`]" />
                   </div>
                 </div>

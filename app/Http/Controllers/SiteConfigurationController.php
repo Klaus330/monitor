@@ -25,7 +25,8 @@ class SiteConfigurationController extends Controller
                 'name' => $siteSetting->setting->name,
                 'value_type' => $siteSetting->setting->value_type,
                 'value' => $siteSetting->value,
-                'group_id' => $siteSetting->setting->group_id
+                'group_id' => $siteSetting->setting->group_id,
+                'description' => $siteSetting->setting->description
             ];
         })->groupBy(function ($setting) {
             return $setting['group_id'];
