@@ -9,13 +9,18 @@ import Checkbox from "@/Components/Checkbox.vue";
 import Toggle from "@/Components/Toggle.vue";
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from "@headlessui/vue";
 
-let form = useForm({
-  crawler_delay: usePage().props.value.configuration.crawler_delay,
-  respect_robots: usePage().props.value.configuration.respect_robots,
-  has_uptime: usePage().props.value.configuration.has_uptime,
-  has_crawlers: usePage().props.value.configuration.has_crawlers,
-  has_lighthouse: usePage().props.value.configuration.has_lighthouse,
+let formValues = {};
+Object.values(usePage().props.value.formValues).forEach((item, index, array) => {
+  let value = Object.values(item)[0];
+
+  if (value == "0" || value === "1") {
+    value = value === "1";
+  }
+
+  formValues[Object.keys(item)[0]] = value;
 });
+
+let form = useForm(formValues);
 
 let saveChanges = () => {
   form.patch(route("site.configuration.update", usePage().props.value.user.id), {
@@ -39,6 +44,8 @@ let saveChanges = () => {
           <TabGroup>
             <TabList class="flex space-x-1 my-2 w-full gap-5">
               <Tab
+                v-for="group in $page.props.settingGroups"
+                :key="group"
                 as="template"
                 v-slot="{ selected }"
               >
@@ -48,30 +55,7 @@ let saveChanges = () => {
                     selected ? 'border-indigo-600' : 'border-gray-300',
                   ]"
                 >
-                  General
-                </button>
-              </Tab>
-              <Tab as="template" class="" v-slot="{ selected }">
-                <button
-                  :class="[
-                    'bg-white focus:outline-none border-b-2',
-                    selected ? 'border-indigo-600' : 'border-gray-300',
-                  ]"
-                >
-                  Uptime
-                </button>
-              </Tab>
-              <Tab
-                as="template"
-                v-slot="{ selected }"
-              >
-                <button
-                  :class="[
-                    'bg-white focus:outline-none border-b-2',
-                    selected ? 'border-indigo-600' : 'border-gray-300',
-                  ]"
-                >
-                  Broken Routes
+                  {{ group }}
                 </button>
               </Tab>
             </TabList>
@@ -82,78 +66,43 @@ let saveChanges = () => {
                   'rounded-xl bg-white outline-none',
                   'ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 outline-none focus:outline-none focus:ring-2',
                 ]"
+                v-for="(config, id) in $page.props.configuration"
+                :key="id"
               >
                 <div class="mb-3 border-b border-gray-300 pb-2 font-semibold mt-5">
                   <h2 class="text-xl">Checks</h2>
                 </div>
 
-                <div class="w-full flex gap-20">
-                  <Toggle
-                    id="crawlers"
-                    :value="form.has_crawlers"
-                    label="Crawlers"
-                    v-model:checked="form.has_crawlers"
-                  />
-                  <Toggle
-                    id="uptime"
-                    :value="form.has_uptime"
-                    label="Uptime"
-                    v-model:checked="form.has_uptime"
-                  />
-                  <Toggle
-                    id="lighthouse"
-                    :value="form.has_lighthouse"
-                    label="Lighthouse"
-                    v-model:checked="form.has_lighthouse"
-                  />
-                </div>
-              </TabPanel>
-              <TabPanel
-                :class="[
-                  'rounded-xl bg-white outline-none p-3',
-                  'ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2 outline-none',
-                ]"
-              >
-              </TabPanel>
-              <TabPanel
-                :class="[
-                  'rounded-xl bg-white outline-none',
-                  'ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2 outline-none',
-                ]"
-              >
-                <div class="my-4 w-1/4">
-                  <InputLabel for="crawler_delay" value="Crawler Delay (ms):" />
-                  <TextInput
-                    id="crawler_delay"
-                    v-model="form.crawler_delay"
-                    type="number"
-                    min="0"
-                    max="10000"
-                    class="mt-1 block w-full"
-                    autofocus
-                  />
-                  <InputError class="mt-2" :message="form.errors.crawler_delay" />
-                </div>
-
-                <div class="my-4">
-                  <div class="flex items-center justify-start gap-2">
-                    <InputLabel for="respect_robots" value="Respect Robots:" />
-                    <Checkbox
-                      id="respect_robots"
-                      :value="form.respect_robots"
-                      v-model:checked="form.respect_robots"
-                      type="checkbox"
-                      class="block"
+                <div class="my-4" v-for="(setting, id) in config" :key="id">
+                  <div v-if="setting.value_type === 'checkbox'">
+                    <Toggle
+                      :id="setting.name"
+                      :value="`${form[`${setting.name}`]}`"
+                      :label="setting.display_name"
+                      v-model:checked="form[`${setting.name}`]"
                     />
+                    <InputError class="mt-2" :message="form.errors[`${setting.name}`]" />
                   </div>
-                  <InputError class="mt-2" :message="form.errors.respect_robots" />
+                  <div v-else>
+                    <InputLabel :for="setting.name" :value="setting.display_name" />
+
+                    <TextInput
+                      :id="setting.name"
+                      :type="setting.value_type"
+                      :value="form[`${setting.name}`]"
+                      v-model="form[`${setting.name}`]"
+                      class="mt-1 block w-full"
+                      autofocus
+                    />
+                    <InputError class="mt-2" :message="form.errors[`${setting.name}`]" />
+                  </div>
                 </div>
               </TabPanel>
             </TabPanels>
           </TabGroup>
         </div>
 
-        <div class="mt-3 text-right">
+        <div class="text-right">
           <PrimaryButton
             :class="{ 'opacity-25': form.processing }"
             :disabled="form.processing"

@@ -339,9 +339,9 @@ class Site extends Model
         );
     }
 
-    public function configuration()
+    public function configurations()
     {
-        return $this->hasOne(SiteConfiguration::class, 'site_id');
+        return $this->hasMany(SiteConfiguration::class, 'site_id');
     }
 
 

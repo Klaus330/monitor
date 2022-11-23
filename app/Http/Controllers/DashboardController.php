@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\CrawlProfiles\CustomCrawlProfile;
+use App\Enums\SettingGroup;
 use App\Events\SiteRegistered;
 use App\Jobs\CrawlSite;
 use App\Jobs\RegisterRobotsTxtPreferences;
+use App\Models\Setting;
 use App\Models\Site;
 use App\Observers\CustomCrawlerObserver;
+use App\Repositories\SiteConfigurationRepository;
 use App\Repositories\SiteRepository;
 use App\Repositories\SiteRouteRepository;
 use App\Services\CrawlerService;
@@ -24,7 +27,7 @@ use Spatie\Crawler\CrawlProfiles\CrawlSubdomains;
 
 class DashboardController extends Controller
 {
-    public function index(SiteRepository $siteRepository, CrawlerService $crawlService, SiteRouteRepository $siteRouteRepository, Browsershot $browsershot)
+    public function index(SiteRepository $siteRepository, SiteConfigurationRepository $configRepo)
     {
         $sites = $siteRepository
             ->findSitesForUser(auth()->user()->id)

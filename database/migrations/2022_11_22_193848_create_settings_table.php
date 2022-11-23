@@ -1,7 +1,6 @@
 <?php
 
-use App\Models\Setting;
-use App\Models\Site;
+use App\Models\SettingGroup;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,11 +14,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('site_configurations', function (Blueprint $table) {
+        Schema::create('settings', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Site::class, 'site_id')->onDelete('cascade');
-            $table->foreignIdFor(Setting::class, 'setting_id')->onDelete('cascade');
-            $table->text('value')->nullable();
+            $table->foreignIdFor(SettingGroup::class, 'group_id')->onDelete('cascade');
+            $table->string('name');
+            $table->string('display_name');
+            $table->string('value_type');
+            $table->text('default_value')->nullable();
             $table->timestamps();
         });
     }
@@ -31,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('site_configurations');
+        Schema::dropIfExists('settings');
     }
 };

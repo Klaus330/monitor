@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Models\Setting;
 use App\Repositories\SiteConfigurationRepository;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -26,8 +27,15 @@ class CreateSiteConfiguration
      */
     public function handle($event)
     {
-        $this->configurationRepo->create([
-            'site_id' => $event->site->id,
-        ]);
+        $settings = Setting::all();
+
+        foreach ($settings as $setting)
+        {
+            $this->configurationRepo->create([
+                'site_id' => $event->site->id,
+                'setting_id' => $setting->id,
+                'value' => $setting->default_value
+            ]);
+        }
     }
 }

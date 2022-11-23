@@ -2,7 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Models\Setting;
+use App\Models\Site;
 use App\Models\SiteConfiguration;
+use Illuminate\Database\Eloquent\Collection;
 
 class SiteConfigurationRepository
 {
@@ -13,9 +16,29 @@ class SiteConfigurationRepository
 
     public function update(array $data)
     {
-        $config = SiteConfiguration::find($data['site_id']);
-        unset($data['site_id']);
+        $site = Site::find($data['site_id'])->load('configurations');
 
-        return $config->update($data);
+        $site->configurations->each(function($siteSetting) use ($data) {
+            $siteSetting->update([
+                'value' => $data[$siteSetting->setting->name]
+            ]);
+        });
+    }
+
+    // public function updateConfigurationFor(int $siteId, string $configurationName)
+    // {
+
+    // }
+
+    public function getSiteConfigurationsByGroupId(Site $site, int $groupId): Collection
+    {
+        $groupSettings = Setting::select('id')
+                                ->where('group_id', $groupId)
+                                ->get()
+                                ->pluck('id');
+
+        return $site->configurations()
+                    ->whereIn('setting_id', $groupSettings)
+                    ->get();
     }
 }

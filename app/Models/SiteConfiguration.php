@@ -12,28 +12,17 @@ class SiteConfiguration extends Model
     public $fillable = [
         'id',
         'site_id',
-        'crawler_delay',
+        'setting_id',
+        'value',
         'updated_at',
-        'respect_robots',
-        'has_uptime',
-        'has_crawlers',
-        'has_lighthouse'
     ];
 
     public $visible = [
         'id',
-        'crawler_delay',
-        'respect_robots',
-        'has_uptime',
-        'has_crawlers',
-        'has_lighthouse'
-    ];
-
-    public $casts = [
-        'respect_robots' => "boolean",
-        'has_uptime' => "boolean",
-        'has_crawlers' => "boolean",
-        'has_lighthouse' => "boolean",
+        'site_id',
+        'setting_id',
+        'value',
+        'updated_at',
     ];
 
     public function site()
@@ -41,6 +30,10 @@ class SiteConfiguration extends Model
         return $this->belongsTo(Site::class, 'site_id');
     }
 
+    public function setting()
+    {
+        return $this->belongsTo(Setting::class, 'setting_id');
+    }
 
     public function getCrawlerDelayInMiliseconds()
     {

@@ -34,7 +34,7 @@ class CrawlerService
     protected const DEFAULT_DELAY_BETWEEN_REQUESTS = 150;
 
     protected const DEFAULT_CONCURENCY = 1;
-    
+
     protected const DEFAULT_MAX_RESPONSE_SIZE = 1024 * 1024;
 
     protected const DEFAULT_PARSEABLE_TYPES = ['text/html', 'text/plain'];
@@ -52,7 +52,7 @@ class CrawlerService
     public function crawl(Site $site): void
     {
         $this->site = $site;
-        
+
         $crawler = Crawler::create($this->getCrawlerConfig())
             ->setDefaultScheme(self::DEFAULT_SCHEMA)
             ->executeJavascript()
@@ -66,7 +66,7 @@ class CrawlerService
             ->setMaximumResponseSize(self::DEFAULT_MAX_RESPONSE_SIZE)
             ->setParseableMimeTypes(self::DEFAULT_PARSEABLE_TYPES)
             ->setDelayBetweenRequests($site->configuration->getCrawlerDelayInMiliseconds() ?? self::DEFAULT_DELAY_BETWEEN_REQUESTS);
-            
+
         $crawler->startCrawling($site->uri);
     }
 

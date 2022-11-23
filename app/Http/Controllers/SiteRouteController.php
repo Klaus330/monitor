@@ -25,7 +25,12 @@ class SiteRouteController extends Controller
         $siteRoutesCount = $siteRouteRepository->getRoutesCountFor($site->id);
 
 
-        return inertia("SiteRoutes/Broken", compact("brokenRoutes", 'site', 'siteRoutes', 'siteRoutesCount'));
+        return inertia("SiteRoutes/Broken", compact(
+            "brokenRoutes",
+            'site',
+            'siteRoutes',
+            'siteRoutesCount'
+        ));
     }
 
     public function getAllRoutes(Site $site, SiteRouteRepository $siteRouteRepository)
