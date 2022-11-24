@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\SettingGroup;
 use App\Enums\State;
+use App\Repositories\SiteConfigurationRepository;
 use Carbon\Carbon;
 use GuzzleHttp\Psr7\Uri;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -47,7 +49,13 @@ class Site extends Model
         'url',
         'user_id',
         'status',
-        'routes'
+        'routes',
+        'inactive_monitors',
+        'configurations',
+    ];
+
+    public $appends = [
+        'inactive_monitors'
     ];
 
     public function getStatus(): State
@@ -359,5 +367,10 @@ class Site extends Model
     public function getUriAttribute(): UriInterface
     {
         return new Uri($this->url);
+    }
+
+    public function getInactiveMonitorsAttribute()
+    {
+        return resolve(SiteConfigurationRepository::class)->getInActiveGroups($this)->pluck('name');
     }
 }

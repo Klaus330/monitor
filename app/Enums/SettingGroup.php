@@ -12,10 +12,10 @@ enum SettingGroup
     public function id(): string
     {
         return match ($this) {
-            static::GENERAL => 0,
-            static::BROKEN_LINKS => 1,
-            static::LIGHTHOUSE => 2,
-            static::MONITORS => 3,
+            static::GENERAL => 1,
+            static::BROKEN_LINKS => 2,
+            static::LIGHTHOUSE => 3,
+            static::MONITORS => 4,
         };
     }
 }

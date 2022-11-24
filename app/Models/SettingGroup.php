@@ -10,6 +10,7 @@ class SettingGroup extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name'
+        'name',
+        'display_name',
     ];
 }

@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\SiteRegistered;
+use App\Events\SettingsPreconfigured;
 use App\Jobs\CrawlSite;
 use App\Jobs\RegisterRobotsTxtPreferences;
 use App\Repositories\SiteConfigurationRepository;
@@ -25,12 +25,15 @@ class StartCrawlingSite
     /**
      * Handle the event.
      *
-     * @param  \App\Events\SiteRegistered  $event
+     * @param  \App\Events\SettingsPreconfigured  $event
      * @return void
      */
-    public function handle(SiteRegistered $event)
+    public function handle(SettingsPreconfigured $event)
     {
-        dispatch(new RegisterRobotsTxtPreferences($event->site))->onQueue('robots');
+        if (!$this->siteConfigRepo->siteHasSettingActive($event->site, config('site_settings.monitors.broken_routes'))) {
+            return;
+        }
+
         dispatch(new CrawlSite($event->site, $this->crawler, $this->siteConfigRepo))->onQueue('crawlers');
     }
 }

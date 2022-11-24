@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Events\SettingsPreconfigured;
 use App\Events\SiteRegistered;
 use App\Listeners\CreateSiteConfiguration;
 use App\Listeners\StartCrawlingSite;
@@ -22,8 +23,10 @@ class EventServiceProvider extends ServiceProvider
             SendEmailVerificationNotification::class,
         ],
         SiteRegistered::class => [
-            StartCrawlingSite::class,
             CreateSiteConfiguration::class,
+        ],
+        SettingsPreconfigured::class => [
+            StartCrawlingSite::class,
         ]
     ];
 

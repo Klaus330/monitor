@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\SettingGroup as EnumsSettingGroup;
+use App\Events\SettingsPreconfigured;
 use App\Models\SettingGroup;
 use App\Models\Site;
 use App\Repositories\SiteConfigurationRepository;
@@ -10,14 +12,17 @@ use Illuminate\Http\Request;
 
 class SiteConfigurationController extends Controller
 {
-    public function index(Site $site)
+    public function index(Site $site, SiteConfigurationRepository $siteConfigurationRepository)
     {
+        // dd($site->inactive_monitors);
         $settings = $site->configurations->load('setting');
         $formValues = $settings->map(function ($siteSetting) {
             return [
                 $siteSetting->setting->name => $siteSetting->value
             ];
         });
+
+        $inActiveMonitors = $siteConfigurationRepository->getInActiveGroups($site)->pluck('id');
 
         $groupedSettings = $settings->map(function ($siteSetting) {
             return [
@@ -28,13 +33,20 @@ class SiteConfigurationController extends Controller
                 'group_id' => $siteSetting->setting->group_id,
                 'description' => $siteSetting->setting->description
             ];
-        })->groupBy(function ($setting) {
+        })->filter(function($siteSetting) use ($inActiveMonitors) {
+            return !\in_array($siteSetting['group_id'], $inActiveMonitors->toArray());
+        })
+        ->groupBy(function ($setting) {
             return $setting['group_id'];
+        });
+
+        $settingGroups = SettingGroup::all()->pluck('display_name')->filter(function($item, $index) use ($inActiveMonitors) {
+            return !\in_array($index + 1, $inActiveMonitors->toArray());
         });
 
         return inertia('Settings/Index', [
             'site' => $site,
-            'settingGroups' => SettingGroup::all()->pluck('name'),
+            'settingGroups' => $settingGroups,
             'configuration' => $groupedSettings,
             'formValues' => $formValues
         ]);
@@ -44,22 +56,27 @@ class SiteConfigurationController extends Controller
     {
         $validated = $request->validate([
             "friendly_name" => 'nullable|string',
-            "crawler_delay" => 'required|numeric|min:0',
-            "respect_robots" => 'required|boolean',
-            "execute_js" => 'required|boolean',
-            "nofollow_links" => 'required|boolean',
+            "crawler_delay" => 'nullable|numeric|min:0',
+            "respect_robots" => 'nullable|boolean',
+            "execute_js" => 'nullable|boolean',
+            "nofollow_links" => 'nullable|boolean',
             "mime_types" => "",
             "something" => "nullable|string",
-            "broken_routes" => 'required|boolean',
-            "lighthouse" => 'required|boolean',
+            "broken_routes" => 'nullable|boolean',
+            "lighthouse" => 'nullable|boolean',
         ]);
 
         try {
-
             $siteConfigurationRepository->update([
                 'site_id' => $site->id,
                 ...$validated
             ]);
+
+            if ($request->has('preconfigure')) {
+                SettingsPreconfigured::dispatch($site);
+
+                return redirect(route('dashboard'))->with('success', 'Settings saved successfully');
+            }
 
             return redirect(route('site.configuration', ['site' => $site->id]))->with('success', 'Settings saved successfully');
         } catch (QueryException $e) {

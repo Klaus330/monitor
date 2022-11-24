@@ -2,7 +2,9 @@
 
 namespace App\Repositories;
 
+use App\Enums\SettingGroup;
 use App\Models\Setting;
+use App\Models\SettingGroup as ModelsSettingGroup;
 use App\Models\Site;
 use App\Models\SiteConfiguration;
 use Illuminate\Database\Eloquent\Collection;
@@ -55,5 +57,31 @@ class SiteConfigurationRepository
     public function siteHasSettingActive(Site $site, string $settingName)
     {
         return $this->getSettingValueForSiteByName($site, $settingName) === "1";
+    }
+
+
+    public function getActiveGroups(Site $site)
+    {
+        $activeMonitorsNames =  $this->getMonitorsNames($site, true);
+
+        return ModelsSettingGroup::whereIn('name', $activeMonitorsNames)->get();
+    }
+
+    public function getInActiveGroups(Site $site)
+    {
+       $activeMonitorsNames =  $this->getMonitorsNames($site, false);
+
+        return ModelsSettingGroup::whereIn('name', $activeMonitorsNames)->get();
+    }
+
+    public function getMonitorsNames(Site $site, bool $areActive)
+    {
+        return \DB::table('setting_groups')
+        ->join('settings', 'setting_groups.id', '=', 'settings.group_id')
+        ->join('site_configurations', 'settings.id', '=', 'site_configurations.setting_id')
+        ->where('site_configurations.site_id', $site->id)
+        ->where('site_configurations.value', $areActive ? "1" : "0")
+        ->where('setting_groups.id', (SettingGroup::MONITORS)->id())
+        ->pluck('settings.name');
     }
 }

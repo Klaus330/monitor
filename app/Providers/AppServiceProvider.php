@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Repositories\SiteConfigurationRepository;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Queue\Events\JobProcessed;

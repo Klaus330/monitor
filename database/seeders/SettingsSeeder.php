@@ -89,7 +89,7 @@ class SettingsSeeder extends Seeder
         foreach ($this->settings as $key => $value) {
             foreach ($value as $setting => $values) {
                 Setting::create([
-                    'group_id' => $key,
+                    'group_id' => $key + 1,
                     'name' => $setting,
                     'default_value' => $values['default'],
                     'value_type' => $values['value_type'],

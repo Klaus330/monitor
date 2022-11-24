@@ -8,7 +8,12 @@ use Illuminate\Database\Seeder;
 
 class SettingGroupSeeder extends Seeder
 {
-    protected array $groups = ["General", "Broken Links", "Lighthouse", "Monitors"];
+    protected array $groups = [
+        "General" => 'general',
+        "Broken Routes" => 'broken_routes',
+        "Lighthouse" => 'lighthouse',
+        "Monitors" => 'monitors'
+    ];
     /**
      * Run the database seeds.
      *
@@ -16,10 +21,10 @@ class SettingGroupSeeder extends Seeder
      */
     public function run()
     {
-        foreach ($this->groups as $group)
-        {
+        foreach ($this->groups as $groupDisplayName => $groupName) {
             SettingGroup::create([
-                'name' => $group
+                'name' => $groupName,
+                'display_name' => $groupDisplayName
             ]);
         }
     }

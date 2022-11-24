@@ -39,6 +39,7 @@ Route::middleware([
     // Sites 
     Route::post('site/{user}/create', [SiteController::class, 'create'])->name('site.create');
     Route::get('site/{site}/all-routes', [SiteRouteController::class, 'getAllRoutes'])->name('site.routes.all');
+    Route::get('site/{site}/preconfigure', [SiteController::class, 'preconfigure'])->name('site.settings.preconfigure');
     Route::get('site/{site}/configuration', [SiteConfigurationController::class, 'index'])->name('site.configuration');
     Route::patch('site/{site}/configuration', [SiteConfigurationController::class, 'update'])->name('site.configuration.update');
     Route::delete('site/delete', [SiteController::class, 'destroy'])->name('site.delete');

@@ -1,15 +1,19 @@
 <script setup>
+import { ref } from "vue";
 import { usePage, useForm } from "@inertiajs/inertia-vue3";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
 import TextInput from "@/Components/TextInput.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
+import SecondaryButton from "@/Components/SecondaryButton.vue";
 import ActionsMenu from "@/Components/ActionsMenu.vue";
 import Checkbox from "@/Components/Checkbox.vue";
 import Toggle from "@/Components/Toggle.vue";
+import DashboardLayout from "@/Layouts/DashboardLayout.vue";
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from "@headlessui/vue";
 
 let formValues = {};
+
 Object.values(usePage().props.value.formValues).forEach((item, index, array) => {
   let value = Object.values(item)[0];
 
@@ -19,29 +23,42 @@ Object.values(usePage().props.value.formValues).forEach((item, index, array) => 
 
   formValues[Object.keys(item)[0]] = value;
 });
+formValues["preconfigure"] = true;
 
+let defaultValues = JSON.parse(JSON.stringify(formValues));
 let form = useForm(formValues);
 
+let keepDefaults = ref(false);
+
 let saveChanges = () => {
+  if (keepDefaults.value) {
+    console.log('hit');
+    form = useForm(defaultValues);
+  }
+
   form.patch(route("site.configuration.update", usePage().props.value.site.id), {
     preserveScroll: true,
   });
 };
+</script>
 
-//  TODO: ONLY SHOW THE SETTINGS FOR THE ACTIVATED MONITORS
+<script>
+export default {
+  layout: DashboardLayout,
+};
 </script>
 
 <template>
-  <div class="mt-5 bg-white w-full">
+  <div class="mt-5 bg-white max-w-7xl mx-auto sm:px-6 lg:px-8">
     <div
       class="flex items-start justify-between border-b border-gray-200 sm:px-6 lg:px-8 pt-5 pb-2"
     >
-      <h2 class="text-2xl font-bold mb-3">Settings</h2>
-
-      <ActionsMenu />
+      <h2 class="text-2xl font-bold mb-3">Choose your prefered settings.</h2>
     </div>
     <div class="sm:px-6 lg:px-8 pt-2 pb-3 w-full">
       <form @submit.prevent="saveChanges">
+        <input type="hidden" name="preconfigure" v-model="form.preconfigure" />
+
         <div class="w-full pt-3 pb-10 sm:px-0">
           <TabGroup>
             <TabList class="flex space-x-1 my-2 w-full gap-5">
@@ -62,19 +79,15 @@ let saveChanges = () => {
               </Tab>
             </TabList>
 
-            <TabPanels class="mt-2 outline-none focus:outline-none">
+            <TabPanels class="mt-6 outline-none focus:outline-none">
               <TabPanel
                 :class="[
                   'rounded-xl bg-white outline-none',
                   'ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 outline-none focus:outline-none focus:ring-2',
                 ]"
-                v-for="(config, id) in $page.props.configuration"
+                v-for="(config, id) in $page.props.configurations"
                 :key="id"
               >
-                <div class="mb-3 border-b border-gray-300 pb-2 font-semibold mt-5">
-                  <h2 class="text-xl">Checks</h2>
-                </div>
-
                 <div class="my-4" v-for="(setting, id) in config" :key="id">
                   <div v-if="setting.value_type === 'checkbox'" class="flex flex-col">
                     <Toggle
@@ -83,7 +96,9 @@ let saveChanges = () => {
                       :label="setting.display_name"
                       v-model:checked="form[`${setting.name}`]"
                     />
-                    <span class="pt-2 text-gray-500 text-sm">{{setting.description}}</span>
+                    <span class="pt-2 text-gray-500 text-sm">{{
+                      setting.description
+                    }}</span>
                     <InputError class="mt-2" :message="form.errors[`${setting.name}`]" />
                   </div>
                   <div v-else>
@@ -97,7 +112,9 @@ let saveChanges = () => {
                       class="mt-1 block w-full"
                       autofocus
                     />
-                    <span class="pt-3 text-gray-500 text-sm">{{setting.description}}</span>
+                    <span class="pt-3 text-gray-500 text-sm">{{
+                      setting.description
+                    }}</span>
                     <InputError class="mt-2" :message="form.errors[`${setting.name}`]" />
                   </div>
                 </div>
@@ -106,12 +123,21 @@ let saveChanges = () => {
           </TabGroup>
         </div>
 
-        <div class="text-right">
+        <div class="flex items-center justify-between my-2">
+          <SecondaryButton
+            :class="{ 'opacity-25': form.processing }"
+            :disabled="form.processing"
+            class="text-normal bg-white border-white shadow-none"
+            @click="keepDefaults = true; saveChanges()"
+          >
+            Keep default values
+          </SecondaryButton>
+
           <PrimaryButton
             :class="{ 'opacity-25': form.processing }"
             :disabled="form.processing"
           >
-            Save
+            Save preferences
           </PrimaryButton>
         </div>
       </form>

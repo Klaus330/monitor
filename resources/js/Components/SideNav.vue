@@ -1,4 +1,5 @@
 <script setup>
+import {computed} from 'vue';
 import { usePage } from "@inertiajs/inertia-vue3";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
 
@@ -6,6 +7,7 @@ const links = [
   {
     name: "site.show",
     displayName: "Overview",
+    group: 'general',
     props: {
       site: usePage().props.value.site.id,
     },
@@ -13,6 +15,7 @@ const links = [
   {
     name: "site.broken.routes",
     displayName: "Broken Links",
+    group: 'broken_routes',
     props: {
       site: usePage().props.value.site.id,
     },
@@ -20,11 +23,20 @@ const links = [
   {
     name: "site.configuration",
     displayName: "Settings",
+    group: 'general',
     props: {
       site: usePage().props.value.site.id,
     },
   },
 ];
+
+
+let linksComputed = computed(() => {
+  return links.filter((link) => {
+    return !usePage().props.value.site.inactive_monitors.includes(link.group)
+  })
+})
+
 </script>
 
 <template>
@@ -47,7 +59,7 @@ const links = [
       <ResponsiveNavLink
         :href="route(`${link.name}`, link.props)"
         :active="route().current(`${link.name}`)"
-        v-for="link in links"
+        v-for="link in linksComputed"
         :key="link.name"
       >
         {{ link.displayName }}
