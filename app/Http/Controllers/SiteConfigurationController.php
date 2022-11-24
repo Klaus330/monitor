@@ -33,14 +33,19 @@ class SiteConfigurationController extends Controller
                 'group_id' => $siteSetting->setting->group_id,
                 'description' => $siteSetting->setting->description
             ];
-        })->filter(function($siteSetting) use ($inActiveMonitors) {
+        })->filter(function ($siteSetting) use ($inActiveMonitors) {
             return !\in_array($siteSetting['group_id'], $inActiveMonitors->toArray());
         })
-        ->groupBy(function ($setting) {
-            return $setting['group_id'];
-        });
+            ->groupBy(function ($setting) {
+                return $setting['group_id'];
+            });
 
-        $settingGroups = SettingGroup::all()->pluck('display_name')->filter(function($item, $index) use ($inActiveMonitors) {
+        $settingGroups = SettingGroup::all()->map(function ($item) {
+            return [
+                'display_name' => $item->display_name,
+                'name' => $item->name
+            ];
+        })->filter(function ($item, $index) use ($inActiveMonitors) {
             return !\in_array($index + 1, $inActiveMonitors->toArray());
         });
 

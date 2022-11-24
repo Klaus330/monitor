@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from "vue";
 import { usePage, useForm } from "@inertiajs/inertia-vue3";
 import InputLabel from "@/Components/InputLabel.vue";
 import InputError from "@/Components/InputError.vue";
@@ -28,7 +29,21 @@ let saveChanges = () => {
   });
 };
 
-//  TODO: ONLY SHOW THE SETTINGS FOR THE ACTIVATED MONITORS
+let currentSettingsPage =
+  window.location.hash === "" ? "general" : window.location.hash.slice(1);
+
+let currentSettingsPageIndex = Object.values(
+  usePage().props.value.settingGroups
+).findIndex((item, index) => {
+  return item.name === currentSettingsPage;
+});
+
+const selectedTab = ref(currentSettingsPageIndex);
+
+function changeTab(index) {
+  window.location.hash = Object.values(usePage().props.value.settingGroups).find((item, id) => id === index).name
+  selectedTab.value = index;
+}
 </script>
 
 <template>
@@ -41,15 +56,16 @@ let saveChanges = () => {
       <ActionsMenu />
     </div>
     <div class="sm:px-6 lg:px-8 pt-2 pb-3 w-full">
-      <form @submit.prevent="saveChanges">
+      <form @submit.prevent="saveChanges" >
         <div class="w-full pt-3 pb-10 sm:px-0">
-          <TabGroup>
+          <TabGroup :selectedIndex="selectedTab" @change="changeTab">
             <TabList class="flex space-x-1 my-2 w-full gap-5">
               <Tab
                 v-for="group in $page.props.settingGroups"
                 :key="group"
                 as="template"
                 v-slot="{ selected }"
+                :data-headlessui-state="{ selected: group.name == currentSettingsPage }"
               >
                 <button
                   :class="[
@@ -57,7 +73,7 @@ let saveChanges = () => {
                     selected ? 'border-indigo-600' : 'border-gray-300',
                   ]"
                 >
-                  {{ group }}
+                  {{ group.display_name }}
                 </button>
               </Tab>
             </TabList>
@@ -83,7 +99,9 @@ let saveChanges = () => {
                       :label="setting.display_name"
                       v-model:checked="form[`${setting.name}`]"
                     />
-                    <span class="pt-2 text-gray-500 text-sm">{{setting.description}}</span>
+                    <span class="pt-2 text-gray-500 text-sm">{{
+                      setting.description
+                    }}</span>
                     <InputError class="mt-2" :message="form.errors[`${setting.name}`]" />
                   </div>
                   <div v-else>
@@ -97,7 +115,9 @@ let saveChanges = () => {
                       class="mt-1 block w-full"
                       autofocus
                     />
-                    <span class="pt-3 text-gray-500 text-sm">{{setting.description}}</span>
+                    <span class="pt-3 text-gray-500 text-sm">{{
+                      setting.description
+                    }}</span>
                     <InputError class="mt-2" :message="form.errors[`${setting.name}`]" />
                   </div>
                 </div>

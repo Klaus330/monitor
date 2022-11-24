@@ -1,7 +1,7 @@
 <script setup>
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import { usePage, useForm } from "@inertiajs/inertia-vue3";
-
+import { computed } from "vue";
 defineProps(["links"]);
 
 let deleteSite = () => {
@@ -10,6 +10,16 @@ let deleteSite = () => {
   });
 
   form.delete(route("site.delete"));
+};
+
+let actionLink = (linkInfo) => {
+  let url = linkInfo.url;
+
+  if (linkInfo.fragment !== undefined) {
+    url = url + `#${linkInfo.fragment}`;
+  }
+
+  return url;
 };
 </script>
 
@@ -38,7 +48,7 @@ let deleteSite = () => {
         <MenuItem v-slot="{ active }" v-for="link in links" :key="link.url">
           <a
             :class="{ 'text-blue-500': active }"
-            :href="link.url"
+            :href="actionLink(link)"
             class="p-3 border-b border-gray-200"
           >
             {{ link.displayName }}

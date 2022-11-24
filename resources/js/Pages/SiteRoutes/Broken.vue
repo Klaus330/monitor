@@ -33,6 +33,7 @@ let actionLinks = [
   {
     url: route("site.configuration", { site: usePage().props.value.site.id }),
     displayName: "Settings",
+    fragment: "broken_routes",
   },
 ];
 
@@ -58,7 +59,7 @@ let loadMoreRoutes = async () => {
     >
       <h2 class="text-2xl font-bold mb-3">Broken Routes</h2>
 
-      <ActionsMenu />
+      <ActionsMenu :links="actionLinks" />
     </div>
     <div class="sm:px-6 lg:px-8 py-5 w-full">
       <div v-show="$page.props.brokenRoutes.data.length > 0">

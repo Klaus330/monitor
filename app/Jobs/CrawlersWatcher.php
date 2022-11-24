@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Site;
+use App\Repositories\SiteConfigurationRepository;
 use App\Services\CrawlerService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -24,7 +25,7 @@ class CrawlersWatcher implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected CrawlerService $crawler)
+    public function __construct(protected CrawlerService $crawler, protected SiteConfigurationRepository $siteConfigRepo)
     {
         //
     }
@@ -41,7 +42,10 @@ class CrawlersWatcher implements ShouldQueue
                 $route = $site->latestCrawled();
                 $site->load('configuration');
 
-                if (!$site->configuration->has_crawlers || $route->diffInMinutes() <= self::CRAWLER_DELAY) {
+                if (
+                    !$this->siteConfigRepo->siteHasSettingActive($this->site, config('site_settings.monitors.broken_routes'))
+                    || $route->diffInMinutes() <= self::CRAWLER_DELAY
+                ) {
                     return;
                 }
 
