@@ -35,10 +35,9 @@ class SiteConfigurationController extends Controller
             ];
         })->filter(function ($siteSetting) use ($inActiveMonitors) {
             return !\in_array($siteSetting['group_id'], $inActiveMonitors->toArray());
-        })
-            ->groupBy(function ($setting) {
-                return $setting['group_id'];
-            });
+        })->groupBy(function ($setting) {
+            return $setting['group_id'];
+        });
 
         $settingGroups = SettingGroup::all()->map(function ($item) {
             return [
@@ -85,7 +84,7 @@ class SiteConfigurationController extends Controller
                 return redirect(route('site.show', compact('site')))->with('success', 'Settings saved successfully');
             }
 
-            return redirect(route('site.configuration', ['site' => $site->id]))->with('success', 'Settings saved successfully');
+            return redirect(route('site.show', ['site' => $site->id]))->with('success', 'Settings saved successfully');
         } catch (QueryException $e) {
             return redirect(route('site.configuration', ['site' => $site->id]))->with('error', 'An error occured while updating.');
         }
