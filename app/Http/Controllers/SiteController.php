@@ -57,6 +57,11 @@ class SiteController extends Controller
 
     public function show(Site $site)
     {
+        if($site->isDraft())
+        {
+            return redirect(route('site.settings.preconfigure', compact('site')));
+        }
+
         return inertia("Sites/Show", [
             'site' => $site,
         ]);
@@ -112,7 +117,7 @@ class SiteController extends Controller
         });
 
         return inertia("Settings/Preconfiguration", [
-            'settingGroups' => SettingGroup::all()->pluck('name'),
+            'settingGroups' => SettingGroup::all()->pluck('display_name'),
             'site' => $site,
             'formValues' => $formValues,
             'configurations' => $groupedSettings

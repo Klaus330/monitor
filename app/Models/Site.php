@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\SettingGroup;
+use App\Enums\SiteState;
 use App\Enums\State;
 use App\Repositories\SiteConfigurationRepository;
 use Carbon\Carbon;
@@ -34,6 +35,7 @@ class Site extends Model
         "downtime",
         "name",
         "headers",
+        'state',
     ];
 
     public $casts = [
@@ -372,5 +374,10 @@ class Site extends Model
     public function getInactiveMonitorsAttribute()
     {
         return resolve(SiteConfigurationRepository::class)->getInActiveGroups($this)->pluck('name');
+    }
+
+    public function isDraft()
+    {
+        return $this->state == (SiteState::DRAFT)->id();
     }
 }

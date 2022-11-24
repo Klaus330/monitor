@@ -32,6 +32,7 @@ return new class extends Migration
             $table->text('robots_preference')->nullable();
             $table->unique(['url', 'name']);
             $table->unique(['url', 'user_id']);
+            $table->unsignedInteger('state')->default(0);
             $table->timestamps();
 
             $table->index(['url', 'user_id']);

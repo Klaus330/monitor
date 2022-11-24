@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\SettingGroup as EnumsSettingGroup;
+use App\Enums\SiteState;
 use App\Events\SettingsPreconfigured;
 use App\Models\SettingGroup;
 use App\Models\Site;
@@ -14,7 +15,6 @@ class SiteConfigurationController extends Controller
 {
     public function index(Site $site, SiteConfigurationRepository $siteConfigurationRepository)
     {
-        // dd($site->inactive_monitors);
         $settings = $site->configurations->load('setting');
         $formValues = $settings->map(function ($siteSetting) {
             return [
@@ -72,10 +72,12 @@ class SiteConfigurationController extends Controller
                 ...$validated
             ]);
 
+            $site->update(['state' => (SiteState::ACTIVE)->id()]);
+
             if ($request->has('preconfigure')) {
                 SettingsPreconfigured::dispatch($site);
 
-                return redirect(route('dashboard'))->with('success', 'Settings saved successfully');
+                return redirect(route('site.show', compact('site')))->with('success', 'Settings saved successfully');
             }
 
             return redirect(route('site.configuration', ['site' => $site->id]))->with('success', 'Settings saved successfully');
