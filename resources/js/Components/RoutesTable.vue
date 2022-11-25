@@ -8,7 +8,7 @@ let props = defineProps({
   hasActions: false,
 });
 
-let columns = reactive(["Site", "Status", "Found On", "Response Time", "Last Checked At"]);
+let columns = reactive(["Site", "Status", "Found On", "Last Checked At"]);
 
 if (props.hasActions) {
   columns.push("Actions");
@@ -53,11 +53,6 @@ let hasRoutesRegistered = () => {
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-ellipsis whitespace-nowrap max-w-xs overflow-hidden">
           <div class="flex items-center">
             {{ siteRoute.found_on ?? "not visited yet" }}
-          </div>
-        </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-ellipsis whitespace-nowrap max-w-xs overflow-hidden">
-          <div class="flex items-center">
-            {{ siteRoute.response_time ?? "not visited yet" }} ms
           </div>
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-ellipsis whitespace-nowrap max-w-xs overflow-hidden">

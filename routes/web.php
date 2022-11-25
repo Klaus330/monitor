@@ -46,6 +46,7 @@ Route::middleware([
 
 
     Route::get('site/{site}/broken-routes', [SiteRouteController::class, 'brokenRoutes'])->name('site.broken.routes');
+    Route::get('site/{site}/broken-routes/dowload-csv', [SiteRouteController::class, 'downloadCsvReport'])->name('site.download.broken_routes.report');
     Route::get('site/{site}', [SiteController::class, 'show'])->name('site.show');
     Route::get('site/{site}/route/{route}', [SiteRouteController::class, 'show'])->name('site.route.show');
     Route::get('/test', [SiteController::class, 'test']);

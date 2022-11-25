@@ -13,8 +13,6 @@ let routeHistory = ref([]);
 let loadedMoreRoutes = ref(usePage().props.value.siteRoutes.data.length > 15);
 
 let fetchRouteHistory = (e) => {
-  console.log(e);
-
   axios
     .get(
       route("site.route.show", { site: usePage().props.value.site.id, route: e.route.id })
@@ -47,7 +45,6 @@ let loadMoreRoutes = async () => {
     .get(route("site.routes.all", { site: usePage().props.value.site.id }))
     .then((res) => {
       usePage().props.value.siteRoutes.data = res.data;
-      // console.log(res);
     });
 };
 </script>
@@ -63,20 +60,37 @@ let loadMoreRoutes = async () => {
     </div>
     <div class="sm:px-6 lg:px-8 py-5 w-full">
       <div v-show="$page.props.brokenRoutes.data.length > 0">
-        <h3 class="text-md font-semibold mb-1">We found some internal broken routes</h3>
+        <h3
+          class="text-md font-semibold mb-1 bg-red-100 border-l-4 border-red-500 p-2 text-red-800 rounded"
+        >
+          We found some internal broken routes
+        </h3>
         <RoutesTable
           :siteRoutes="$page.props.brokenRoutes.data"
           :site="$page.props.site"
           :hasActions="true"
           @fetchroute="fetchRouteHistory"
         />
+
+        <p class="mt-3">
+          Download the broken links report:
+          <a
+            class="text-indigo-500 hover:text-indigo-700  hover:underline"
+            :href="
+              route('site.download.broken_routes.report', { site: $page.props.site.id })
+            "
+            >Download .csv</a
+          >
+        </p>
       </div>
 
-      <span
-        v-show="$page.props.brokenRoutes.data.length === 0"
-        class="w-full border-l-2 border-green-400 bg-green-200 p-3 rounded"
-        >We haven't found any broken links.</span
-      >
+      <div class="w-full">
+        <span
+          v-show="$page.props.brokenRoutes.data.length === 0"
+          class="w-full border-l-4 border-green-400 bg-green-100 p-3 rounded text-green-800"
+          >We haven't found any broken links.</span
+        >
+      </div>
 
       <div>
         <div class="mt-10">

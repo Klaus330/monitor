@@ -6,23 +6,28 @@ use App\Models\Site;
 use App\Models\SiteRoute;
 use App\Repositories\SiteRouteRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 
 class SiteRouteController extends Controller
 {
-    public function show(Site $site, SiteRoute $route, SiteRouteRepository $routesRepo)
+    public function __construct(protected SiteRouteRepository $routesRepo)
     {
-        $routes = $routesRepo->findRouteHistoryFor($site->id, $route->route);
+    }
+
+    public function show(Site $site, SiteRoute $route)
+    {
+        $routes = $this->routesRepo->findRouteHistoryFor($site->id, $route->route);
         return $routes;
     }
 
-    public function brokenRoutes(Site $site, SiteRouteRepository $siteRouteRepository)
+    public function brokenRoutes(Site $site)
     {
-        $brokenRoutes = $siteRouteRepository->findBrokenRoutesForSite($site->id)->paginate(30);
-        $siteRoutes = $siteRouteRepository
+        $brokenRoutes = $this->routesRepo->findBrokenRoutesForSite($site->id)->paginate(30);
+        $siteRoutes = $this->routesRepo
             ->latestSiteRouteStatuses($site)
             ->paginate(15);
 
-        $siteRoutesCount = $siteRouteRepository->getRoutesCountFor($site->id);
+        $siteRoutesCount = $this->routesRepo->getRoutesCountFor($site->id);
 
 
         return inertia("SiteRoutes/Broken", compact(
@@ -33,10 +38,19 @@ class SiteRouteController extends Controller
         ));
     }
 
-    public function getAllRoutes(Site $site, SiteRouteRepository $siteRouteRepository)
+    public function getAllRoutes(Site $site)
     {
-        return  $siteRouteRepository
+        return  $this->routesRepo
             ->latestSiteRouteStatuses($site)
             ->get();
+    }
+
+    public function downloadCsvReport(Site $site)
+    {
+        $filename = "csv_report" . date('Ymd_His') . ".csv";
+
+        return response()->streamDownload(function () use ($site) {
+            echo $this->routesRepo->generateCsvReportWithBrokenLinks($site);
+        }, $filename);
     }
 }
