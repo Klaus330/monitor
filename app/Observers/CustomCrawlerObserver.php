@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Events\SiteCrawled;
 use App\Models\Site;
 use App\Repositories\SiteRouteRepository;
 use DOMDocument;
@@ -87,7 +88,7 @@ class CustomCrawlerObserver extends CrawlObserver
         
         $this->registerRoute($url, $requestException->getResponse(), $foundOnUrl);
 
-        dd($requestException);
+        // dd($requestException);
     }
 
     /**
@@ -96,6 +97,7 @@ class CustomCrawlerObserver extends CrawlObserver
     public function finishedCrawling(): void
     {
         Log::info("finishedCrawling");
-        // SEND REPORT EMAIL
+        
+        SiteCrawled::dispatch($this->site);
     }
 }

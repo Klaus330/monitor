@@ -2,32 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\CrawlProfiles\CustomCrawlProfile;
-use App\Enums\SettingGroup;
-use App\Events\SiteRegistered;
-use App\Jobs\CrawlSite;
-use App\Jobs\RegisterRobotsTxtPreferences;
-use App\Models\Setting;
+use App\Mail\BrokenLinksReport;
 use App\Models\Site;
-use App\Observers\CustomCrawlerObserver;
 use App\Repositories\SiteConfigurationRepository;
 use App\Repositories\SiteRepository;
 use App\Repositories\SiteRouteRepository;
-use App\Services\CrawlerService;
-use GuzzleHttp\Psr7\Uri;
-use GuzzleHttp\RequestOptions;
-use GuzzleHttp\TransferStats;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
-use Spatie\Browsershot\Browsershot;
-use Spatie\Crawler\Crawler;
-use Spatie\Crawler\CrawlProfiles\CrawlAllUrls;
-use Spatie\Crawler\CrawlProfiles\CrawlInternalUrls;
-use Spatie\Crawler\CrawlProfiles\CrawlSubdomains;
 
 class DashboardController extends Controller
 {
-    public function index(SiteRepository $siteRepository, SiteConfigurationRepository $configRepo)
+    public function index(SiteRepository $siteRepository)
     {
         $sites = $siteRepository
             ->findSitesForUser(auth()->user()->id)

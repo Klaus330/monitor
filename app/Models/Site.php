@@ -54,6 +54,7 @@ class Site extends Model
         'routes',
         'inactive_monitors',
         'configurations',
+        'user',
     ];
 
     public $appends = [

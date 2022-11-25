@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Events\SettingsPreconfigured;
+use App\Events\SiteCrawled;
 use App\Events\SiteRegistered;
 use App\Listeners\CreateSiteConfiguration;
+use App\Listeners\SendBrokenLinksReport;
 use App\Listeners\StartCrawlingSite;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -27,6 +29,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         SettingsPreconfigured::class => [
             StartCrawlingSite::class,
+        ],
+        SiteCrawled::class => [
+            SendBrokenLinksReport::class,
         ]
     ];
 

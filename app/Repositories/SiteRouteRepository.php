@@ -81,6 +81,16 @@ class SiteRouteRepository
             ->whereIn('updated_at', $latestRoutes);
     }
 
+    public function hasBrokenLinks(int $siteId)
+    {
+        return $this->findBrokenRoutesForSite($siteId)->exists();
+    }
+
+    public function getBrokenLinksCount(int $siteId): int
+    {
+        return $this->findBrokenRoutesForSite($siteId)->count();
+    }
+
     public function getLatestUpdatedRoutes(int $siteId)
     {
         return  SiteRoute::forSite($siteId)
@@ -99,6 +109,39 @@ class SiteRouteRepository
 
     public function getRoutesCountFor(int $siteId): int
     {
-        return SiteRoute::forSite($siteId)->count();
+        return $this->latestSiteRouteStatuses(Site::find($siteId))->count();
+    }
+
+    public function generateCsvReportWithBrokenLinks(Site $site)
+    {
+        $content = null;
+        try {
+            $fd = fopen('php://temp/maxmemory:1048576', 'w');
+
+            if ($fd == false) {
+                return null;
+            }
+
+            $headers = ['route', 'http_code', 'found_on'];
+
+            $routes = $this->findBrokenRoutesForSite($site->id)
+                ->select(...$headers)
+                ->get()
+                ->toArray();
+
+            fputcsv($fd, $headers);
+
+            foreach ($routes as $route) {
+                unset($route['last_check']);
+                fputcsv($fd, $route);
+            }
+            rewind($fd);
+
+            $content = stream_get_contents($fd);
+        } finally {
+            fclose($fd);
+        }
+
+        return $content;
     }
 }
