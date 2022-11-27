@@ -50,4 +50,8 @@ Route::middleware([
     Route::get('site/{site}', [SiteController::class, 'show'])->name('site.show');
     Route::get('site/{site}/route/{route}', [SiteRouteController::class, 'show'])->name('site.route.show');
     Route::get('/test', [SiteController::class, 'test']);
+
+
+    Route::post('/request/{site}/broken-links/run', [SiteRouteController::class, 'requestBrokenLinksRun'])
+        ->name('request.broken_links.run');
 });

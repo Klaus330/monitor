@@ -109,7 +109,6 @@ function changeTab(index) {
                       :value="form[`${setting.name}`]"
                       v-model="form[`${setting.name}`]"
                       class="mt-1 block w-full"
-                      autofocus
                     />
                     <span class="pt-3 text-gray-500 text-sm">{{
                       setting.description

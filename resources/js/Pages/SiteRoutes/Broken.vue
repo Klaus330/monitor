@@ -2,7 +2,7 @@
 import RoutesTable from "@/Components/RoutesTable.vue";
 import DialogModal from "@/Components/DialogModal.vue";
 import { ref } from "vue";
-import { usePage } from "@inertiajs/inertia-vue3";
+import { usePage, useForm } from "@inertiajs/inertia-vue3";
 import SecondaryButton from "@/Components/SecondaryButton.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import Pagination from "@/Components/Pagination.vue";
@@ -27,6 +27,10 @@ let actionLinks = [
   {
     url: "#",
     displayName: "Request new broken links run",
+    onClick: () => {
+      let form = useForm();
+      form.post(route('request.broken_links.run', { site: usePage().props.value.site.id }))
+    }
   },
   {
     url: route("site.configuration", { site: usePage().props.value.site.id }),

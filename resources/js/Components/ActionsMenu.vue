@@ -45,7 +45,7 @@ let actionLink = (linkInfo) => {
           </a>
         </MenuItem>
 
-        <MenuItem v-slot="{ active }" v-for="link in links" :key="link.url">
+        <MenuItem v-slot="{ active }" v-for="link in links" :key="link.url" @click="link.onClick">
           <a
             :class="{ 'text-blue-500': active }"
             :href="actionLink(link)"
