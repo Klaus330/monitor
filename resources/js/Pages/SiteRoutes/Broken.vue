@@ -58,7 +58,17 @@ let loadMoreRoutes = async () => {
 
       <ActionsMenu :links="actionLinks" />
     </div>
-    <div class="sm:px-6 lg:px-8 py-5 w-full">
+    <div class="sm:px-6 lg:px-8 py-5 w-full" v-if="$page.props.siteRoutesCount == 0">
+      <div class="w-full">
+        <span
+          v-show="$page.props.brokenRoutes.data.length === 0"
+          class="w-full border-l-4 border-blue-400 bg-blue-100 p-3 rounded text-blue-800"
+          >We haven't finished crawling your site, yet. We'll send you an email
+          notification when it's done.</span
+        >
+      </div>
+    </div>
+    <div class="sm:px-6 lg:px-8 py-5 w-full" v-else>
       <div v-show="$page.props.brokenRoutes.data.length > 0">
         <h3
           class="text-md font-semibold mb-1 bg-red-100 border-l-4 border-red-500 p-2 text-red-800 rounded"
@@ -75,7 +85,7 @@ let loadMoreRoutes = async () => {
         <p class="mt-3">
           Download the broken links report:
           <a
-            class="text-indigo-500 hover:text-indigo-700  hover:underline"
+            class="text-indigo-500 hover:text-indigo-700 hover:underline"
             :href="
               route('site.download.broken_routes.report', { site: $page.props.site.id })
             "
@@ -84,12 +94,11 @@ let loadMoreRoutes = async () => {
         </p>
       </div>
 
-      <div class="w-full">
-        <span
-          v-show="$page.props.brokenRoutes.data.length === 0"
-          class="w-full border-l-4 border-green-400 bg-green-100 p-3 rounded text-green-800"
-          >We haven't found any broken links.</span
-        >
+      <div
+        v-show="$page.props.brokenRoutes.data.length === 0"
+        class="w-full border-l-4 border-green-400 bg-green-100 p-3 rounded text-green-800"
+      >
+        <span>We haven't found any broken links.</span>
       </div>
 
       <div>

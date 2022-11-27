@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Site;
 use App\Models\SiteRoute;
+use Illuminate\Support\Collection;
 
 class SiteRouteRepository
 {
@@ -75,10 +76,12 @@ class SiteRouteRepository
         $latestRoutes = $this->getLatestUpdatedRoutes($siteId);
 
         return SiteRoute::forSite($siteId)
-            ->where('http_code', "NOT LIKE", '2__')
-            ->where('http_code', "NOT LIKE", '3__')
             ->orderBy('updated_at', 'DESC')
-            ->whereIn('updated_at', $latestRoutes);
+            ->whereIn('updated_at', $latestRoutes)
+            ->where(function ($query) {
+                return $query->where('http_code', "LIKE", '4__')
+                             ->orWhere('http_code', "LIKE", '5__');
+            });
     }
 
     public function hasBrokenLinks(int $siteId)
@@ -143,5 +146,20 @@ class SiteRouteRepository
         }
 
         return $content;
+    }
+
+    public function getFixedBrokenRoutes(int $siteId, array $brokenRoutes): Collection
+    {
+        $latestRoutes = $this->getLatestUpdatedRoutes($siteId);
+
+        return SiteRoute::forSite($siteId)
+            ->whereIn('route', $brokenRoutes)
+            ->orderBy('updated_at', 'DESC')
+            ->whereIn('updated_at', $latestRoutes)
+            ->where(function ($query) {
+                return $query->where('http_code', "LIKE", '2__')
+                             ->orWhere('http_code', "LIKE", '3__');
+            })
+            ->get();
     }
 }

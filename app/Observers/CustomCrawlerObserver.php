@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Events\BrokenLinksFixed;
 use App\Events\SiteCrawled;
 use App\Models\Site;
 use App\Repositories\SiteRouteRepository;
@@ -16,8 +17,15 @@ class CustomCrawlerObserver extends CrawlObserver
 {
     protected const BAD_REQUEST_CODE = 400;
 
+    protected array $crawledLinks = [];
+    protected array $brokenRoutes = [];
+
     public function __construct(protected Site $site, protected SiteRouteRepository $siteRouteRepository)
     {
+        $this->brokenRoutes = $siteRouteRepository->findBrokenRoutesForSite($site->id)
+                                                ->pluck('route')
+                                                ->transform(fn ($item) =>  trim($item, '/'))
+                                                ->toArray();
     }
     /**
      * Called when the crawler will crawl the url.
@@ -61,6 +69,8 @@ class CustomCrawlerObserver extends CrawlObserver
                 'updated_at' => now()
             ]);
 
+            $this->crawledLinks[] = $urlPath;
+
             return;
         }
 
@@ -70,6 +80,8 @@ class CustomCrawlerObserver extends CrawlObserver
             'found_on' => $foundOnUrlPath,
             'http_code' => $response?->getStatusCode() ?? self::BAD_REQUEST_CODE,
         ]);
+
+        $this->crawledLinks[] = $urlPath;
     }
 
     /**
@@ -85,10 +97,8 @@ class CustomCrawlerObserver extends CrawlObserver
         ?UriInterface $foundOnUrl = null
     ): void {
         Log::error('crawlFailed', ['url' => $url, 'error' => $requestException->getMessage()]);
-        
-        $this->registerRoute($url, $requestException->getResponse(), $foundOnUrl);
 
-        // dd($requestException);
+        $this->registerRoute($url, $requestException->getResponse(), $foundOnUrl);
     }
 
     /**
@@ -97,7 +107,13 @@ class CustomCrawlerObserver extends CrawlObserver
     public function finishedCrawling(): void
     {
         Log::info("finishedCrawling");
-        
+
+        $theRestOfTheRoutes = array_diff($this->brokenRoutes, $this->crawledLinks);
+
+        if (count($theRestOfTheRoutes) < count($this->brokenRoutes)) {
+            BrokenLinksFixed::dispatch($this->site, $this->brokenRoutes);
+        }
+
         SiteCrawled::dispatch($this->site);
     }
 }

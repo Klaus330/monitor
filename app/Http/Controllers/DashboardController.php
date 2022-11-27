@@ -12,8 +12,9 @@ use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
-    public function index(SiteRepository $siteRepository)
+    public function index(SiteRepository $siteRepository, SiteRouteRepository $routeRepository)
     {
+        // dd($routeRepository->getFixedBrokenRoutes(6, ['blog']));
         $sites = $siteRepository
             ->findSitesForUser(auth()->user()->id)
             ->paginate(10)

@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Events\BrokenLinksFixed;
 use App\Events\SettingsPreconfigured;
 use App\Events\SiteCrawled;
 use App\Events\SiteRegistered;
 use App\Listeners\CreateSiteConfiguration;
+use App\Listeners\SendBrokenLinksFixedMail;
 use App\Listeners\SendBrokenLinksReport;
 use App\Listeners\StartCrawlingSite;
 use Illuminate\Auth\Events\Registered;
@@ -32,6 +34,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         SiteCrawled::class => [
             SendBrokenLinksReport::class,
+        ],
+        BrokenLinksFixed::class => [
+            SendBrokenLinksFixedMail::class,
         ]
     ];
 
