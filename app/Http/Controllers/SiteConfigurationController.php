@@ -8,6 +8,7 @@ use App\Events\SettingsPreconfigured;
 use App\Models\SettingGroup;
 use App\Models\Site;
 use App\Repositories\SiteConfigurationRepository;
+use App\Rules\ValidContentType;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 
@@ -64,7 +65,7 @@ class SiteConfigurationController extends Controller
             "respect_robots" => 'nullable|boolean',
             "execute_js" => 'nullable|boolean',
             "nofollow_links" => 'nullable|boolean',
-            "mime_types" => "",
+            "mime_types" => ['nullable', new ValidContentType()],
             "something" => "nullable|string",
             "broken_routes" => 'nullable|boolean',
             "lighthouse" => 'nullable|boolean',
