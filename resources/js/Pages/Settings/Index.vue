@@ -87,10 +87,6 @@ function changeTab(index) {
                 v-for="(config, id) in $page.props.configuration"
                 :key="id"
               >
-                <div class="mb-3 border-b border-gray-300 pb-2 font-semibold mt-5">
-                  <h2 class="text-xl">Checks</h2>
-                </div>
-
                 <div class="my-4" v-for="(setting, id) in config" :key="id">
                   <div v-if="setting.value_type === 'checkbox'" class="flex flex-col">
                     <Toggle

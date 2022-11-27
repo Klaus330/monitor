@@ -61,7 +61,7 @@ class SiteConfigurationController extends Controller
     {
         $validated = $request->validate([
             "friendly_name" => 'nullable|string',
-            "crawler_delay" => 'nullable|numeric|min:0',
+            "crawler_delay" => 'nullable|numeric|min:0|max:500',
             "respect_robots" => 'nullable|boolean',
             "execute_js" => 'nullable|boolean',
             "nofollow_links" => 'nullable|boolean',
