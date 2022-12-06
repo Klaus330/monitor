@@ -32,6 +32,7 @@
     "dependencies": {
         "@headlessui/react": "^1.7.4",
         "@headlessui/vue": "^1.7.4",
+        "lighthouse": "^9.6.8",
         "puppeteer": "^17.1.3"
     }
 }

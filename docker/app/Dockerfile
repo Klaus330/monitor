@@ -10,7 +10,7 @@ RUN apt-get update \
     && dpkg-reconfigure -f noninteractive tzdata
 
 RUN apt-get update \
-    && apt install lsb-release ca-certificates apt-transport-https software-properties-common -y \
+    && apt install sudo lsb-release ca-certificates apt-transport-https software-properties-common -y \
     && add-apt-repository ppa:ondrej/php \
     && apt-get install -y curl zip unzip git supervisor sqlite3 \
        nginx php8.1-fpm php8.1-cli \
@@ -28,7 +28,8 @@ RUN apt-get update \
     && echo "daemon off;" >> /etc/nginx/nginx.conf \
     && curl -sL https://deb.nodesource.com/setup_14.x | bash - \
     && apt-get install -y gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgbm1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget libgbm-dev libxshmfence-dev
-    
+
+
 ENV NODE_VERSION=16.13.0
 RUN apt install -y curl
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
@@ -47,7 +48,20 @@ ADD nginx.conf /etc/nginx/sites-available/default
 ADD supervisor.conf /etc/supervisor/conf.d/supervisord.conf
 ADD php-fpm.conf /etc/php/8.1/fpm/php-fpm.conf
 ADD start-container.sh /usr/bin/start-container
-RUN chmod +x /usr/bin/start-container
 
+RUN groupadd -g ${MY_GID:-1000} docker \
+&& useradd -u ${MY_UID:-1000} -g docker -G sudo -s /bin/sh docker \
+&& cat /etc/passwd
+
+RUN  mkdir -p /var/log/php-fpm \
+    && chown -R www-data:www-data /var/www \
+    && chown -R www-data:www-data /var/log/nginx \
+    && chown -R www-data:www-data /var/log/php-fpm \
+    && chown -R www-data:www-data /var/log/supervisor 
+
+RUN chmod a+x /usr/bin/start-container
+
+RUN mkdir -p /root/.npm/_cacache/tmp \
+    && chown -R 33:33 /root/.npm
 # CMD /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
 ENTRYPOINT '/usr/bin/start-container'

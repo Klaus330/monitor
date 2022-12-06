@@ -13,6 +13,9 @@ services:
     ports:
       - ${APP_PORT}:80
       - 5173:5173
+    environment:
+      - MY_UID=${MY_UID}
+      - MY_GID=${MY_GID}
     working_dir: /var/www/html
 
   redis:
@@ -46,6 +49,9 @@ services:
      - appnet
     volumes:
      - .:/opt
+    environment:
+      - MY_UID=${MY_UID}
+      - MY_GID=${MY_GID}
     working_dir: /opt
     command: echo hi
 
@@ -58,6 +64,9 @@ services:
     depends_on:
       - db
     working_dir: /var/www/html
+    environment:
+      - MY_UID=${MY_UID}
+      - MY_GID=${MY_GID}
     entrypoint: ['php', '/var/www/html/artisan', 'queue:work']
     networks:
       - appnet

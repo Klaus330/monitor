@@ -15,7 +15,8 @@
         "laravel/tinker": "^2.5",
         "spatie/browsershot": "^3.57",
         "spatie/crawler": "^7.1",
-        "tightenco/ziggy": "^1.0"
+        "tightenco/ziggy": "^1.0",
+        "titasgailius/terminal": "^1.2"
     },
     "require-dev": {
         "spatie/laravel-ignition": "^1.0",

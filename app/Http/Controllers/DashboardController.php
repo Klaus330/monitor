@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Lighthouse\LighthouseAuditor;
 use App\Mail\BrokenLinksReport;
 use App\Models\Site;
 use App\Repositories\SiteConfigurationRepository;
@@ -12,9 +13,8 @@ use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
-    public function index(SiteRepository $siteRepository, SiteRouteRepository $routeRepository)
+    public function index(SiteRepository $siteRepository)
     {
-        // dd($routeRepository->getFixedBrokenRoutes(6, ['blog']));
         $sites = $siteRepository
             ->findSitesForUser(auth()->user()->id)
             ->paginate(10)
