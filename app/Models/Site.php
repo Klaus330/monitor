@@ -338,7 +338,7 @@ class Site extends Model
         return file_exists($this->dir_lighthouse_reports . 'report.html');
     }
 
-    public function latestCrawled()
+    public function latestCrawledAt()
     {
         $lastCrawledDate = $this->routes()
             ->select(\DB::raw('DISTINCT MAX(updated_at) as last_updated'))

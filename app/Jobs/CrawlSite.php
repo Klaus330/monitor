@@ -49,7 +49,6 @@ class CrawlSite implements ShouldQueue, ShouldBeUnique
     public function failed($e)
     {
         Log::error($e);
-        dd($e);
     }
 
     public function uniqueId()

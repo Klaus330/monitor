@@ -60,13 +60,13 @@ class SiteRouteController extends Controller
 
     public function requestBrokenLinksRun(Site $site, CrawlerService $crawlerService, SiteConfigurationRepository $siteConfigurationRepository)
     {
-        if (auth()->user()->cannot('runBrokenLinksMonitor', $site)) {
+        if (auth()->user()->cant('runBrokenLinksMonitor', $site)) {
             return back()->with('error', 'You can only request a run for this check every 5 minutes.');
         }
         
         $cacheKey = auth()->user()->id . $site->id . 'broken_links';
         Cache::put($cacheKey, false, 300);
-
+        
         dispatch(new CrawlSite($site, $crawlerService, $siteConfigurationRepository))->onQueue('crawlers');
 
         return back()->with('success', 'The Broken routes check will run again soon.');

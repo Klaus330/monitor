@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Site;
 use App\Models\Team;
 use App\Policies\MonitorsPolicy;
 use App\Policies\TeamPolicy;

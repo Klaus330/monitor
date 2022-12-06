@@ -40,8 +40,6 @@ class CrawlerService
 
     protected const DEFAULT_PARSEABLE_TYPES = 'text/html,text/plain';
 
-    protected const DEFAULT_USER_AGENT = "Oopsie.app";
-
     protected const DEFAULT_SCHEMA = 'https';
 
     protected Site $site;
@@ -64,22 +62,22 @@ class CrawlerService
             )
             ->setMaximumResponseSize(self::DEFAULT_MAX_RESPONSE_SIZE)
             ->setParseableMimeTypes(
-                explode(',', $this->siteConfigRepo->getSettingValueForSiteByName($site, config('site_settings.broken_routes.mime_types'))  ?? self::DEFAULT_PARSEABLE_TYPES)
+                explode(',', $this->getValue(config('site_settings.broken_routes.mime_types'))  ?? self::DEFAULT_PARSEABLE_TYPES)
             )
             ->setDelayBetweenRequests(
-                $this->siteConfigRepo->getSettingValueForSiteByName($site, config('site_settings.broken_routes.crawler_delay')) ?? self::DEFAULT_DELAY_BETWEEN_REQUESTS
+                $this->getValue(config('site_settings.broken_routes.crawler_delay')) ?? self::DEFAULT_DELAY_BETWEEN_REQUESTS
             );
 
-        if ($this->siteConfigRepo->siteHasSettingActive($site, config('site_settings.broken_routes.nofollow_links'))) {
+        if ($this->isActive(config('site_settings.broken_routes.nofollow_links'))) {
             $crawler->acceptNofollowLinks();
         }
 
-        if ($this->siteConfigRepo->siteHasSettingActive($site, config('site_settings.broken_routes.execute_js'))) {
+        if ($this->isActive(config('site_settings.broken_routes.execute_js'))) {
             $crawler->executeJavascript()
                 ->setBrowsershot($this->browsershot->noSandbox());
         }
 
-        if ($this->siteConfigRepo->siteHasSettingActive($site, config('site_settings.broken_routes.respect_robots'))) {
+        if ($this->isActive(config('site_settings.broken_routes.respect_robots'))) {
             $crawler->respectRobots();
         } else {
             $crawler->ignoreRobots();
@@ -95,8 +93,18 @@ class CrawlerService
             RequestOptions::TIMEOUT => self::DEFAULT_TIMEOUT_LIMIT,
             RequestOptions::VERIFY => self::DEFAULT_VERIFY_SSL,
             RequestOptions::HEADERS => [
-                'User-Agent' => self::DEFAULT_USER_AGENT
+                'User-Agent' => config('crawler_defaults.user_agent')
             ],
         ];
+    }
+
+    public function isActive(string $settingName): bool
+    {
+        return $this->siteConfigRepo->siteHasSettingActive($this->site, $settingName);
+    }
+
+    public function getValue(string $settingName): mixed
+    {
+        return $this->siteConfigRepo->getSettingValueForSiteByName($this->site, $settingName);
     }
 }

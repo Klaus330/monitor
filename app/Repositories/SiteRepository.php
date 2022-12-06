@@ -22,4 +22,14 @@ class SiteRepository
     {
         return Site::find($id);
     }
+
+    public function getSitesWithActiveCrawlers()
+    {
+        return Site::leftJoin('site_configurations', 'site_configurations.site_id', '=', 'sites.id')
+                    ->leftJoin('settings', "site_configurations.setting_id", '=', 'settings.id')
+                    ->where('settings.name', 'broken_routes')
+                    ->where('site_configurations.value', '1')
+                    ->orderBy('site_configurations.site_id')
+                    ->select('sites.*');
+    }
 }

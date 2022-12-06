@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Site;
 use App\Repositories\SiteConfigurationRepository;
+use App\Repositories\SiteRepository;
 use App\Services\CrawlerService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -25,7 +26,7 @@ class CrawlersWatcher implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected CrawlerService $crawler, protected SiteConfigurationRepository $siteConfigRepo)
+    public function __construct(protected CrawlerService $crawler, protected SiteConfigurationRepository $siteConfigRepo, protected SiteRepository $siteRepository)
     {
         //
     }
@@ -37,24 +38,26 @@ class CrawlersWatcher implements ShouldQueue
      */
     public function handle()
     {
-        Site::chunk(100, function ($sites) {
-            $sites->each(function ($site) {
-                $route = $site->latestCrawled();
+        $this->siteRepository
+            ->getSitesWithActiveCrawlers()
+            ->chunk(100, function ($sites) {
+                $sites->each(function ($site) {
+                    $lastCrawledAt = $site->latestCrawledAt();
 
-                Log::info("Attempting to crawl site with id:" . $site->id);
+                    Log::info("Attempting to crawl site with id:" . $site->id);
 
-                if (
-                    !$this->siteConfigRepo->siteHasSettingActive($site, config('site_settings.monitors.broken_routes'))
-                    || $route->diffInDays() < self::CRAWLER_DELAY
-                ) {
-                    Log::info("Failed. Diff in days:" . $route->diffInDays());
-                    Log::info("Failed. Has crawling monitor active:" . (string) $this->siteConfigRepo->siteHasSettingActive($site, config('site_settings.monitors.broken_routes')));
-                    return;
-                }
+                    if (
+                        !$this->siteConfigRepo->siteHasSettingActive($site, config('site_settings.monitors.broken_routes'))
+                        || $lastCrawledAt->diffInDays() < self::CRAWLER_DELAY
+                    ) {
+                        Log::info("Failed. Diff in days:" . $lastCrawledAt->diffInDays() . ', ' . $site->id);
+                        Log::info("Failed. Has crawling monitor active:" . (string) $this->siteConfigRepo->siteHasSettingActive($site, config('site_settings.monitors.broken_routes')));
+                        return;
+                    }
 
-                Log::info("Will crawl site with id:" . $site->id . ', '. $route->diffInMinutes());
-                CrawlSite::dispatch($site, $this->crawler, $this->siteConfigRepo)->onQueue('crawlers');
+                    Log::info("Will crawl site with id:" . $site->id . ', ' . $lastCrawledAt);
+                    CrawlSite::dispatch($site, $this->crawler, $this->siteConfigRepo)->onQueue('crawlers');
+                });
             });
-        });
     }
 }

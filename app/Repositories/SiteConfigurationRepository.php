@@ -48,9 +48,9 @@ class SiteConfigurationRepository
             return SiteConfiguration::forSite($site->id)
                 ->where('setting_id', $setting->id)
                 ->first()
-                ->value;
+                ?->value;
         } catch (\Exception $e) {
-            dd($e);
+            dd($e, $site);
         }
     }
 
