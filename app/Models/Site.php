@@ -290,29 +290,28 @@ class Site extends Model
         }, $this->routes()->select('route')->get()->toArray());
     }
 
-
     public function getBrokenLinksAttribute()
     {
         return $this->routes()
             ->where('http_code', 'not like', '2__')
-            ->where('http_code', 'not like', '3__');
+            ->where('http_code', 'not like', '3__')
+            ->get();
     }
 
     public function hasBrokenLinks()
     {
-        return $this->broken_links->get()->isNotEmpty();
+        return $this->broken_links->isNotEmpty();
     }
 
     public function brokenLinksStatus()
     {
-        return $this->broken_links->get()->isEmpty() ? State::SUCCESS : State::ERROR;
+        return $this->broken_links->isEmpty() ? State::SUCCESS : State::ERROR;
     }
 
     public function getDirReportsAttribute()
     {
         return $_SERVER['DOCUMENT_ROOT'] . '/reports/' . $this->id . '/';
     }
-
 
     public function getAveragePerformanceAttribute(): int
     {

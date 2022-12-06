@@ -43,14 +43,13 @@ class CrawlersWatcher implements ShouldQueue
             ->chunk(100, function ($sites) {
                 $sites->each(function ($site) {
                     $lastCrawledAt = $site->latestCrawledAt();
-
                     Log::info("Attempting to crawl site with id:" . $site->id);
 
                     if (
                         !$this->siteConfigRepo->siteHasSettingActive($site, config('site_settings.monitors.broken_routes'))
                         || $lastCrawledAt->diffInDays() < self::CRAWLER_DELAY
                     ) {
-                        Log::info("Failed. Diff in days:" . $lastCrawledAt->diffInDays() . ', ' . $site->id);
+                        Log::info("Failed. Diff in days:" . $lastCrawledAt->diffInDays());
                         Log::info("Failed. Has crawling monitor active:" . (string) $this->siteConfigRepo->siteHasSettingActive($site, config('site_settings.monitors.broken_routes')));
                         return;
                     }

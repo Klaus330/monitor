@@ -16,7 +16,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->job(CrawlersWatcher::class)->everyMinute();
+        $schedule->job(CrawlersWatcher::class)->daily();
     }
 
     /**
