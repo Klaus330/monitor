@@ -24,6 +24,17 @@ export default {
       },
       deep: true,
     },
+    "$page.props.errors": {
+      handler(value) {
+        if(usePage().props.value.flash.error !== null || Object.keys(value).length == 0) 
+        {
+          return;
+        }
+        
+        usePage().props.value.flash.error = "An error has occurred.";
+      },
+      deep: true,
+    }
   },
 };
 </script>

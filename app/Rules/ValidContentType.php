@@ -32,12 +32,12 @@ class ValidContentType implements Rule
      */
     public function passes($attribute, $value)
     {
-        $contetTypes = explode(',', $value);
+        $contentTypes = explode(',', $value);
 
         $valid = true;
 
-        foreach ($contetTypes as $contetType) {
-            if (!in_array(trim(' ', $contetType), $this->allowedContentTypes)) {
+        foreach ($contentTypes as $contentType) {
+            if (!in_array(trim($contentType, ' '), $this->allowedContentTypes)) {
                 $valid = false;
             }
         }
