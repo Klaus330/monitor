@@ -9,7 +9,8 @@ class LighthouseAuditor
 {
     protected $timeout = 120;
     protected $headers = [];
-    protected $lighthousePath = './node_modules/lighthouse/lighthouse-cli/index.js';
+    protected $lighthousePath = '/var/www/html/node_modules/lighthouse/lighthouse-cli/index.js';
+    protected const CHROME_PATH = 'usr/bin/chromium-browser';
     protected $output = ['json'];
     protected $outputFormat = '--output=json';
     protected $categories = [];
@@ -25,36 +26,32 @@ class LighthouseAuditor
 
     public function audit($site)
     {
-        dd(\TitasGailius\Terminal\Terminal::run('node -V')->getOutput());
-
-        // dd($this->generateCommand($site->url));
-        $process = new Process($this->generateCommand($site->url));
-
+        $process = new Process($this->generateCommand($site->url), null, ['CHROME_PATH' => self::CHROME_PATH], null, $this->timeout);
+        dd($process->getCommandLine());
         $process->setTimeout($this->timeout)
-                ->run(callback: null, env: []);
+                ->run(null, []);
 
         if(!$process->isSuccessful())
         {
             throw new \Exception($process->getErrorOutput());
         }
 
-        dd($process->getOutput());
         return $process->getOutput();
     }
 
     public function generateCommand($url)
     {
         return [
-            'echo $PATH',
-        //     // '/root/.nvm/versions/node/v16.13.0/bin/node',
-        //     $this->lighthousePath,
-        //     $url,
-        //     '--output ' . $this->getOutput(),
-        //     !empty($this->outputPath) ? $this->getOutputPath() : null,
-        //     ...$this->headers,
-        //     '--quite',
-        //     $this->getCategories(),
-        //    '--chrome-flags="'.implode(' ', $this->defaultFlags).'"'
+            'sudo',
+            '/root/.nvm/versions/node/v16.13.0/bin/node',
+            $this->lighthousePath,
+            $url,
+            '--output ' . $this->getOutput(),
+            !empty($this->outputPath) ? $this->getOutputPath() : null,
+            ...$this->headers,
+            '--quiet',
+            $this->getCategories(),
+           '--chrome-flags="'.implode(' ', $this->defaultFlags).'"'
         ];
     }
 
@@ -84,28 +81,28 @@ class LighthouseAuditor
     public function bestPractices($on = true)
     {
         $this->setCategory('best-practices', $on);
-        
+
         return $this;
     }
 
     public function performance($on = true)
     {
         $this->setCategory('performance', $on);
-        
+
         return $this;
     }
 
     public function pwa($on = true)
     {
         $this->setCategory('pwa', $on);
-        
+
         return $this;
     }
 
     public function seo($on = true)
     {
         $this->setCategory('seo', $on);
-        
+
         return $this;
     }
 
