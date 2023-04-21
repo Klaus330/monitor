@@ -3,59 +3,68 @@
 namespace App\Lighthouse;
 
 use Symfony\Component\Process\Process;
+use App\Models\Site;
 use File;
 
 class LighthouseAuditor
 {
-    protected $timeout = 120;
-    protected $headers = [];
-    protected $lighthousePath = '/var/www/html/node_modules/lighthouse/lighthouse-cli/index.js';
+    protected const LIGHTHOUSE_PATH = '/var/www/html/node_modules/lighthouse/lighthouse-cli/index.js';
     protected const CHROME_PATH = 'usr/bin/chromium-browser';
-    protected $output = ['json'];
-    protected $outputFormat = '--output=json';
-    protected $categories = [];
-    protected $nodePath = null;
-    protected $defaultFlags = ['--headless', '--disable-gpu', '--no-sandbox'];
-    protected $outputPath = [];
+    
+    protected int $timeout = 500;
+    protected array $headers = [];
+    protected array $output = ['json'];
+    protected array $categories = [];
+    protected ?string $nodePath = null;
+    protected array $defaultFlags = ['--headless', '--disable-gpu', '--no-sandbox'];
+    protected array $outputPath = [];
+    protected bool $quiet = true;
+    protected ?Process $process = null;
+    protected bool $enableDebug = false;
 
-
-    public function __construct()
+    public function audit(Site $site): self
     {
-        //
-    }
+        $this->process = Process::fromShellCommandline($this->generateCommand($site->url));
+        
+        $this->process->setTimeout($this->timeout)
+                ->run($this->enableDebug ? $this->debugCallback() : null, []);
 
-    public function audit($site)
-    {
-        $process = new Process($this->generateCommand($site->url), null, ['CHROME_PATH' => self::CHROME_PATH], null, $this->timeout);
-        dd($process->getCommandLine());
-        $process->setTimeout($this->timeout)
-                ->run(null, []);
-
-        if(!$process->isSuccessful())
+        if(!$this->process->isSuccessful())
         {
-            throw new \Exception($process->getErrorOutput());
+            throw new \Exception($this->process->getErrorOutput());
         }
 
-        return $process->getOutput();
+        return $this;
     }
 
-    public function generateCommand($url)
+    public function getAuditOutput(): string
     {
-        return [
+        if(null === $this->process)
+        {
+            return '';
+        }
+
+        return $this->process->getOutput();
+    }
+
+    protected function generateCommand(string $url): string
+    {
+        return implode(' ', [
             'sudo',
             '/root/.nvm/versions/node/v16.13.0/bin/node',
-            $this->lighthousePath,
+            self::LIGHTHOUSE_PATH,
             $url,
             '--output ' . $this->getOutput(),
+            '--plugins=lighthouse-plugin-field-performance',
             !empty($this->outputPath) ? $this->getOutputPath() : null,
             ...$this->headers,
-            '--quiet',
+            $this->quiet ? '--quiet' : null,
             $this->getCategories(),
            '--chrome-flags="'.implode(' ', $this->defaultFlags).'"'
-        ];
+        ]);
     }
 
-    public function setCategory($category, $on)
+    public function setCategory(string $category, bool $on):self 
     {
         $catIndex = array_search($category, $this->categories);
 
@@ -71,47 +80,47 @@ class LighthouseAuditor
     }
 
 
-    public function accessibility($on = true)
+    public function accessibility(bool $on = true): self
     {
         $this->setCategory('accessibility', $on);
 
         return $this;
     }
 
-    public function bestPractices($on = true)
+    public function bestPractices(bool $on = true): self
     {
         $this->setCategory('best-practices', $on);
 
         return $this;
     }
 
-    public function performance($on = true)
+    public function performance(bool $on = true): self
     {
         $this->setCategory('performance', $on);
 
         return $this;
     }
 
-    public function pwa($on = true)
+    public function pwa(bool $on = true): self
     {
         $this->setCategory('pwa', $on);
 
         return $this;
     }
 
-    public function seo($on = true)
+    public function seo(bool $on = true): self
     {
         $this->setCategory('seo', $on);
 
         return $this;
     }
 
-    public function getCategories()
+    public function getCategories(): ?string
     {
         return empty($this->categories) ? null : '--only-categories=' . implode(',', $this->categories);
     }
 
-    public function setHeaders($headers)
+    public function setHeaders(string $headers): self
     {
         if(empty($headers))
         {
@@ -125,39 +134,61 @@ class LighthouseAuditor
         return $this;
     }
 
-    public function setTimeout($timeout)
+    public function setTimeout(int $timeout): self
     {
         $this->timeout = $timeout;
 
         return $this;
     }
 
-    public function outputCommand($site)
+    public function outputCommand($site): string
     {
         return implode(' ', $this->generateCommand($site->url));
     }
 
-    public function outputFormat($output = 'json')
+    public function outputFormat(string $output = 'json'): self
     {
         $this->output = ['--output', $output];
 
         return $this;
     }
 
-    public function getOutput()
+    public function getOutput(): string
     {
         return implode(' ', $this->output);
     }
 
-    public function outputPath($path = "./report.json")
+    public function outputPath(string $path = "./report.json") : self
     {
         $this->outputPath = ['--output-path=', $path];
 
         return $this;
     }
 
-    public function getOutputPath()
+    public function getOutputPath(): string
     {
         return implode('', $this->outputPath);
+    }
+
+    public function quite(bool $value): self
+    {
+        $this->quiet = $value;
+
+        return $this;
+    }
+
+    public function enableDebugLogs(bool $value): self
+    {
+        $this->enableDebug = $value;
+
+        return $this;
+    }
+
+    private function debugCallback (): callback
+    {
+        return function ($type, $buffer) {
+            $logType = Process::ERR === $type ? 'ERR > ' : 'OUT >';
+            dump($logType . $buffer);
+        };
     }
 }

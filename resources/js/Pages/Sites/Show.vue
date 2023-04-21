@@ -4,7 +4,27 @@ import RoutesTable from "@/Components/RoutesTable.vue";
 import Pagination from "@/Components/Pagination.vue";
 import { Link } from "@inertiajs/inertia-vue3";
 import ActionsMenu from "@/Components/ActionsMenu.vue";
+import Metrics from "@/Components/Lighthouse/Metrics.vue";
+import Timeline from "@/Components/Lighthouse/Timeline.vue";
+// import { Chart } from "highcharts-vue";
+// import HighChart from "highcharts";
 
+// console.log(HighChart.chart('container', {
+//   chart: {
+//     type: 'timeline',
+//   }
+// }))
+
+
+// console.log(Chart);
+
+// let chartOptions = {
+//   series: [
+//     {
+//       data: [1, 2, 3], // sample data
+//     },
+//   ],
+// };
 
 let actionLinks = [
   {
@@ -28,6 +48,10 @@ let actionLinks = [
           <ActionsMenu :links="actionLinks" />
         </div>
         <div>
+          <Timeline />
+          <Metrics />
+
+          <!-- <Player/> -->
           <!-- <RoutesTable
             :siteRoutes="$page.props.siteRoutes.data"
             :site="$page.props.site"

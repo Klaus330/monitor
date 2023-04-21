@@ -32,7 +32,11 @@
     "dependencies": {
         "@headlessui/react": "^1.7.4",
         "@headlessui/vue": "^1.7.4",
+        "highcharts": "^10.3.3",
+        "highcharts-vue": "^1.4.0",
         "lighthouse": "^9.6.8",
+        "lighthouse-plugin-crux": "^0.0.1",
+        "lighthouse-plugin-field-performance": "^3.0.0",
         "puppeteer": "^17.1.3"
     }
 }

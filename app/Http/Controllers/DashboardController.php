@@ -15,7 +15,7 @@ class DashboardController extends Controller
 {
     public function index(SiteRepository $siteRepository)
     {
-      
+
 
         $sites = $siteRepository
             ->findSitesForUser(auth()->user()->id)
@@ -34,7 +34,7 @@ class DashboardController extends Controller
             });
 
 
-        dump((new LighthouseAuditor())->audit(Site::find(24)));
+//        dump((new LighthouseAuditor())->audit(Site::find(24)));
 
         return Inertia::render('Dashboard', [
             'sites' => $sites
